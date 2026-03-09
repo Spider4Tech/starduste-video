@@ -1,0 +1,90 @@
+{# templates/video_test/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="glass-card mb-4">
+                    <div class="video-container" style="border-radius: 15px; overflow: hidden; box-shadow: 0 10px 30px rgba(108, 92, 231, 0.2);">
+                        {# vjs-big-play-centered : met le bouton au milieu #}
+                        {# vjs-fluid : adapte la taille automatiquement #}
+                        <video
+                            id="starduste-player"
+                            class="video-js vjs-big-play-centered vjs-fluid vjs-normalise-time-controls"
+                            controls
+                            preload="auto"
+                            poster="https://via.placeholder.com/1280x720/0a0a0f/6c5ce7?text=Starduste+Video">
+                            <source src="{{ asset('uploads/videos/output_dash/manifest.mpd') }}" type="application/dash+xml">
+                            <track src="{{ asset('uploads/subtitles/spinningNugget.vtt') }}" kind="subtitles" srclang="fr" label="Français">
+                        </video>
+                    </div>
+
+                    <div class="mt-4">
+                        <span class="badge" style="background: var(--accent-purple);">En local</span>
+                        <h1 class="mt-2" style="font-size: 2rem;">Test de visionnage : {{ video_title|default('Ma première vidéo Starduste') }}</h1>
+                        <div class="d-flex align-items-center mt-3 text-white-50">
+                            <i class="bi bi-eye-fill me-2"></i> 0 vues • {{ "now"|date("d M. Y") }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="glass-card">
+                    <h3 class="syne mb-3" style="font-size: 1.2rem; color: var(--accent-purple);">À propos du test</h3>
+                    <p class="small text-white-50">Ce fichier est servi par Symfony via le dossier <code>public/uploads/videos/</code>.</p>
+                    <button class="btn w-100 mt-3" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; border: none; border-radius: 10px; font-weight: 600;">
+                        <i class="bi bi-rocket-takeoff me-2"></i> Publier une vidéo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // On s'assure que le DOM est chargé
+        document.addEventListener('DOMContentLoaded', function() {
+            var player = videojs('starduste-player', {
+                playbackRates: [0.25,0.5, 1, 1.5, 2,2.5],
+                // On active explicitement les contrôles
+                controls: true,
+                controlBar: {
+                    // C'est ici qu'on force la naissance des composants
+                    children: [
+                        'playToggle',
+                        {name: 'volumePanel', inline: false},
+                        'progressControl',
+                        'liveDisplay',
+                        'remainingTimeDisplay',
+                        'currentTimeDisplay',
+                        'timeDivider',
+                        'durationDisplay',
+                        'playbackRateMenuButton',
+                        'subsCapsButton',
+                        'fullscreenToggle'
+                    ]
+
+                }
+            });
+
+            player.ready(function (){
+                player.qualityLevels();
+
+                player.hlsQualitySelector({
+                    displayCurrentQuality: false
+                });
+                console.log("changeur de qualité activé")
+            });
+
+            // Petit check pour confirmer dans la console
+            player.ready(function() {
+                console.log("Lecteur Starduste prêt !");
+                console.log("Composant Duration :", player.controlBar.durationDisplay);
+            });
+        });
+    </script>
+{% endblock %}
+

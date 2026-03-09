@@ -1,0 +1,41 @@
+{% block formulaire %}
+    <form id="loginForm">
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Mot de passe" required>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <p id="error"></p>
+
+    <script>
+    document.getElementById("loginForm").addEventListener("submit", async function(e) {
+
+    e.preventDefault(); // empêche le rechargement de la page
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    const response = await fetch("/api/login", {
+    method: "POST",
+    headers: {
+    "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+    email: email,
+    password: password
+    })
+    });
+
+    const data = await response.json();
+
+    if(response.ok){
+    alert("test terminé avec succes")
+    } else {
+    document.getElementById("error").innerText = data.message;
+    }
+
+    });
+    </script>
+
+{% endblock %}

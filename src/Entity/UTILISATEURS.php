@@ -1,0 +1,171 @@
+<?php
+
+namespace App\Entity;
+
+use App\Repository\UTILISATEURSRepository;
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity(repositoryClass: UTILISATEURSRepository::class)]
+class UTILISATEURS
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    #[ORM\Column(length: 24)]
+    private ?string $Pseudo = null;
+
+    #[ORM\Column]
+    private ?int $SUBSCRIBERS = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    private ?\DateTime $JOIN_DATE = null;
+
+    #[ORM\Column]
+    private ?int $UPLOADED_VIDEO = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?bool $IS_ADMIN = null;
+
+    #[ORM\Column]
+    private ?int $AGE = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $PASSWORD = null;
+
+    #[ORM\Column(length: 50)]
+    private ?string $EMAIL = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $IP_ADRESSE = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTime $LAST_LOGIN = null;
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getPseudo(): ?string
+    {
+        return $this->Pseudo;
+    }
+
+    public function setPseudo(string $Pseudo): static
+    {
+        $this->Pseudo = $Pseudo;
+
+        return $this;
+    }
+
+    public function getSUBSCRIBERS(): ?int
+    {
+        return $this->SUBSCRIBERS;
+    }
+
+    public function setSUBSCRIBERS(int $SUBSCRIBERS): static
+    {
+        $this->SUBSCRIBERS = $SUBSCRIBERS;
+
+        return $this;
+    }
+
+    public function getJOINDATE(): ?\DateTime
+    {
+        return $this->JOIN_DATE;
+    }
+
+    public function setJOINDATE(?\DateTime $JOIN_DATE): static
+    {
+        $this->JOIN_DATE = $JOIN_DATE;
+
+        return $this;
+    }
+
+    public function getUPLOADEDVIDEO(): ?int
+    {
+        return $this->UPLOADED_VIDEO;
+    }
+
+    public function setUPLOADEDVIDEO(int $UPLOADED_VIDEO): static
+    {
+        $this->UPLOADED_VIDEO = $UPLOADED_VIDEO;
+
+        return $this;
+    }
+
+    public function iSADMIN(): ?bool
+    {
+        return $this->IS_ADMIN;
+    }
+
+    public function setISADMIN(?bool $IS_ADMIN): static
+    {
+        $this->IS_ADMIN = $IS_ADMIN;
+
+        return $this;
+    }
+
+    public function getAGE(): ?int
+    {
+        return $this->AGE;
+    }
+
+    public function setAGE(int $AGE): static
+    {
+        $this->AGE = $AGE;
+
+        return $this;
+    }
+
+    public function getPASSWORD(): ?string
+    {
+        return $this->PASSWORD;
+    }
+
+    public function setPASSWORD(string $PASSWORD): static
+    {
+        $this->PASSWORD = $PASSWORD;
+
+        return $this;
+    }
+
+    public function getEMAIL(): ?string
+    {
+        return $this->EMAIL;
+    }
+
+    public function setEMAIL(string $EMAIL): static
+    {
+        $this->EMAIL = $EMAIL;
+
+        return $this;
+    }
+
+    public function getIPADRESSE(): ?string
+    {
+        return $this->IP_ADRESSE;
+    }
+
+    public function setIPADRESSE(?string $IP_ADRESSE): static
+    {
+        $this->IP_ADRESSE = $IP_ADRESSE;
+
+        return $this;
+    }
+
+    public function getLASTLOGIN(): ?\DateTime
+    {
+        return $this->LAST_LOGIN;
+    }
+
+    public function setLASTLOGIN(?\DateTime $LAST_LOGIN): static
+    {
+        $this->LAST_LOGIN = $LAST_LOGIN;
+
+        return $this;
+    }
+}

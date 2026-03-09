@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{# <!DOCTYPE html>
 <html>
     <head>
         <meta charset="UTF-8">
@@ -14,4 +14,155 @@
     <body>
         {% block body %}{% endblock %}
     </body>
+</html> #}
+
+{# templates/base.html.twig #}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Starduste{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href = "@silvermine/videojs-quality-selector@1.3.1/files/dist/css/quality-selector.css">
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --accent-purple: #6c5ce7;
+            --text-main: #ffffff;
+        }
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: 'DM Sans', sans-serif;
+        }
+        h1, h2, .syne { font-family: 'Syne', sans-serif; font-weight: 800; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+        }
+    </style>
+    {% block stylesheets %}
+       <style>
+           @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+           @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&family=Tektur:wght@400..900&display=swap');
+
+           /* On force le conteneur à redevenir simple */
+           /* Le conteneur de la barre */
+           .vjs-normalise-time-controls .vjs-control-bar {
+               background: rgba(15, 15, 20, 0.7) !important; /* Fond sombre translucide */
+               backdrop-filter: blur(10px);                  /* L'effet de flou magique */
+               height: 30px;
+               bottom: 15px;                                 /* On la fait flotter */
+               left: 15px;
+               right: 15px;
+               width: auto;
+               border-radius: 12px;                          /* Coins arrondis */
+               border: 1px solid rgba(255, 255, 255, 0.1);    /* Petit liseré pour le relief */
+           }
+
+           /* 2. LES BOUTONS (Taille et Alignement) */
+           /* On cible le bouton ET l'icône (:before) */
+           .video-js.vjs-normalise-time-controls .vjs-control {
+               width: 50px !important; /* Zone de clic plus large */
+               height: 30px !important;
+           }
+
+           .video-js.vjs-normalise-time-controls .vjs-button > .vjs-icon-placeholder:before,
+           .video-js.vjs-normalise-time-controls .vjs-control:before {
+               font-size: 2.5em !important; /* Voilà tes gros logos */
+               line-height: 30px !important; /* Parfaitement centré sur la hauteur de 45px */
+           }
+
+           /* La barre de fond (grise) */
+           .vjs-normalise-time-controls .vjs-progress-control .vjs-progress-holder {
+               height: 6px;
+               border-radius: 3px;
+               background: rgba(255, 255, 255, 0.2);
+           }
+
+           /* La barre de progression (ta couleur) */
+           .vjs-normalise-time-controls .vjs-play-progress {
+               background: linear-gradient(90deg, #6a11cb 0%, var(--accent-purple) 100%) !important;
+               border-radius: 3px;
+               position: relative;
+           }
+
+           .vjs-normalise-time-controls .vjs-play-progress:after {
+               content: "";
+               position: absolute;
+               top: 0; left: 0; right: 0; bottom: 0;
+               background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+           }
+
+           /* Style pour tes chronos (current-time / duration) */
+           .vjs-normalise-time-controls .vjs-current-time-display,
+           .vjs-normalise-time-controls .vjs-duration-display,
+           .vjs-normalise-time-controls .vjs-time-divider {
+               font-family: 'Tektur', sans-serif !important;
+               font-weight: 700 !important;
+               font-size: 1.1em !important;
+               line-height: 30px !important;
+               color: #ffffff !important;
+           }
+
+           /* ✅ AJOUT : cibler les spans enfants où le texte est réellement rendu */
+           .vjs-normalise-time-controls .vjs-current-time-display *,
+           .vjs-normalise-time-controls .vjs-duration-display *,
+           .vjs-normalise-time-controls .vjs-time-divider * {
+               font-family: 'Roboto', sans-serif !important;
+               font-weight: 700 !important;
+           }
+
+           /* Le petit curseur (Playhead) */
+           .vjs-normalise-time-controls .vjs-play-progress:before {
+               display: block !important; /* On force l'affichage */
+               color: #fff;
+               font-size: 1.2em;
+               top: 0px;
+               text-shadow: 0 0 15px var(--accent-purple); /* Effet néon */
+           }
+
+           /* On force l'affichage en ligne du trio : temps actuel / slash / durée */
+           .vjs-normalise-time-controls .vjs-current-time,
+           .vjs-normalise-time-controls .vjs-time-divider,
+           .vjs-normalise-time-controls .vjs-duration {
+               display: flex !important;
+                /* Pour pas qu'ils soient collés */
+           }
+
+           /* On dégage le compte à rebours qui fout le bordel */
+           .vjs-normalise-time-controls .vjs-remaining-time {
+               display: none !important;
+               padding: 0 2px;
+           }
+
+           .vjs-quality-selector .vjs-icon-placeholder:before {
+               content: "\f110" !important; /* L'icône engrenage */
+               font-family: VideoJS !important;
+               display: block;
+           }
+        </style>
+
+    {% endblock %}
+</head>
+<body>
+{% block body %}{% endblock %}
+
+<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+<script src="https://unpkg.com/videojs-contrib-quality-levels@4.1.0/dist/videojs-contrib-quality-levels.min.js"></script>
+
+<script src="https://unpkg.com/videojs-hls-quality-selector@2.0.0/dist/videojs-hls-quality-selector.min.js"></script>
+
+
+{% block javascripts %}{% endblock %}
+</body>
 </html>
