@@ -2,12 +2,15 @@
 
 namespace App\Entity;
 
-use App\Repository\UTILISATEURSRepository;
+use App\Repository\UtilisateursRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
-#[ORM\Entity(repositoryClass: UTILISATEURSRepository::class)]
-class UTILISATEURS
+#[ORM\Entity(repositoryClass: UtilisateursRepository::class)]
+#[ORM\Table(name: "Users")]
+class Utilisateurs implements PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -15,30 +18,45 @@ class UTILISATEURS
     private ?int $id = null;
 
     #[ORM\Column(length: 24)]
+    #[Assert\NotBlank]
     private ?string $Pseudo = null;
 
     #[ORM\Column]
+    #[Assert\PositiveOrZero]
     private ?int $SUBSCRIBERS = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTime $JOIN_DATE = null;
 
     #[ORM\Column]
+    #[Assert\PositiveOrZero]
     private ?int $UPLOADED_VIDEO = null;
 
     #[ORM\Column(nullable: true)]
     private ?bool $IS_ADMIN = null;
 
     #[ORM\Column]
+    #[Assert\NotBlank]
+    #[Assert\Range(min: 13, max: 120)]
     private ?int $AGE = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 8, max: 64)]
+    #[Assert\Regex(
+        pattern: "/^(?=.*[A-Za-z])(?=.*\d)(?=.*[\W_]).+$/",
+        message: "Le mot de passe doit contenir au moins une lettre un chiffre et un symbole."
+    )]
     private ?string $PASSWORD = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 50, unique: true)]
+    #[Assert\Email]
+    #[Assert\Length(max : 50)]
+    #[Assert\NotBlank]
     private ?string $EMAIL = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Ip]
     private ?string $IP_ADRESSE = null;
 
     #[ORM\Column(nullable: true)]
@@ -121,7 +139,7 @@ class UTILISATEURS
         return $this;
     }
 
-    public function getPASSWORD(): ?string
+    public function getPassword(): ?string
     {
         return $this->PASSWORD;
     }
@@ -129,7 +147,6 @@ class UTILISATEURS
     public function setPASSWORD(string $PASSWORD): static
     {
         $this->PASSWORD = $PASSWORD;
-
         return $this;
     }
 

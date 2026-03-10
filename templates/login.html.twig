@@ -1,7 +1,8 @@
 {% block formulaire %}
-    <form id="loginForm">
+    <form id="loginForm" method="post" action="/api/login">
         <input type="email" id="email" placeholder="Email" required>
         <input type="password" id="password" placeholder="Mot de passe" required>
+        <input type="hidden" name="_token" value="{{ csrf_token('login') }}">
 
         <button type="submit">Login</button>
     </form>
@@ -15,8 +16,10 @@
 
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
+    _token: document.querySelector('input[name="_token"]').value
 
-    const response = await fetch("/api/login", {
+
+        const response = await fetch("/api/login", {
     method: "POST",
     headers: {
     "Content-Type": "application/json"

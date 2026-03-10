@@ -11,6 +11,6 @@ class VideoTestController extends AbstractController
     #[Route('/video/test', name: 'app_video_test')]
     public function index(): Response
     {
-        return $this->render('video_test/index.html.twig');
+        return $this->render('video_test/controller.html.twig');
     }
 }
