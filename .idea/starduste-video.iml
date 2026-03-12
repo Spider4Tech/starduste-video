@@ -131,6 +131,8 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/webmozart/assert" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/nelmio/api-doc-bundle" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/zircote/swagger-php" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/polyfill-uuid" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/uid" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

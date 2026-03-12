@@ -8,6 +8,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Form\FormTypeInterface;
+
 
 #[ORM\Entity(repositoryClass: UtilisateursRepository::class)]
 #[ORM\Table(name: "Utilisateurs")]
@@ -18,8 +20,15 @@ class Utilisateurs implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\Column(length: 36, unique: true)]
+    private ?string $uuid = null;
+
+
+
+
     #[ORM\Column(length: 24)]
-    #[Assert\NotBlank]
+    #[Assert\Range(max: 24, maxMessage: "veuillez entrer un pseudo de moins de 24 lettres")]
+    #[Assert\NotBlank(message: "veuillez entrer un pseudo")]
     private ?string $Pseudo = null;
 
     #[ORM\Column]
@@ -37,8 +46,8 @@ class Utilisateurs implements UserInterface, PasswordAuthenticatedUserInterface
     private ?bool $IS_ADMIN = null;
 
     #[ORM\Column]
-    #[Assert\NotBlank(message: )]
-    #[Assert\Range(min: 13, max: 120)]
+    #[Assert\NotBlank]
+    #[Assert\Range(min: 13, max: 120, notInRangeMessage: "veuillez entrer un age entre 13 et 120 ans")]
     private ?int $AGE = null;
 
     #[ORM\Column(length: 255)]
@@ -66,7 +75,15 @@ class Utilisateurs implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(nullable:true)]
     private ?string $pfppath = null;
 
-    public function getId(): ?int
+    public function getUuid(): ?string
+    {
+        return $this->uuid;
+    }
+
+    public function setUuid(?string $uuid): void
+    {
+        $this->uuid = $uuid;
+    } public function getId(): ?int
     {
         return $this->id;
     }
@@ -155,7 +172,7 @@ class Utilisateurs implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getPassword(): string
     {
-        return $this->PASSWORD;
+        return $this->PASSWORD ?? '';
     }
 
     public function setPASSWORD(string $PASSWORD): static

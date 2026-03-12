@@ -1,49 +1,25 @@
 {% block register %}
+     {{ form_start(registerform, {attr: {id: 'registerform'}}) }}
+     {{ form_row(registerform.Pseudo) }}
+     {{ form_row(registerform.AGE) }}
+     {{ form_row(registerform.EMAIL) }}
+     {{ form_row(registerform.PASSWORD) }}
+     <button type="submit">Enregistrer</button>
+     {{ form_end(registerform) }}
 
-
-    <form id="registerForm" method="post" action="/api/register">
-
-        <label for="pseudo">Pseudo</label>
-        <input type="text" id="pseudo" required>
-
-        <label for="email">Email</label>
-        <input type="email" id="email" required>
-
-        <label for="age">Age</label>
-        <input type="number" id="age" min="0" required>
-
-        <label for="password">Mot de passe</label>
-        <input type="password" id="password" required>
-        <input type="hidden" name="_token" value="{{ csrf_token('register') }}">
-
-        <button type="submit">S'inscrire</button>
-
-    </form>
-
-    <p id="error"></p>
+     <p id="error"></p>
     <script>
-        document.getElementById("registerForm").addEventListener("submit", async function(e) {
+        document.getElementById("registerform").addEventListener("submit", async function(e) {
 
             e.preventDefault(); // empêche le rechargement de la page
-
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            const pseudo = document.getElementById("pseudo").value;
-            const age = document.getElementById("age").value;
-
+            const form = document.getElementById("registerform");
 
             const response = await fetch("/api/register", {
                 method: "POST",
+                body: new URLSearchParams(new FormData(form)),
                 headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password,
-                    pseudo: pseudo,
-                    age: age,
-                    _token: document.querySelector('input[name="_token"]').value
-                })
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
             });
 
             const data = await response.json();
@@ -51,7 +27,7 @@
             if(response.ok){
                 alert("test terminé avec succes")
             } else {
-                document.getElementById("error").innerText = data.message;
+                document.getElementById("error").innerText = data.message || "Une erreur est survenue";
             }
 
         });

@@ -6,7 +6,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request;
-
+use App\Entity\Utilisateurs;
+use App\Form\RegisterType;
 final class DefaultController extends AbstractController
 {
     #[Route('/login', name: 'app_login')]
@@ -21,8 +22,12 @@ final class DefaultController extends AbstractController
     #[Route('/register', name: 'app_register')]
     public function register(): Response
     {
+        $user = new Utilisateurs();
+
+        $registerForm = $this->createForm(RegisterType::class, $user);
+
         return $this->render('register.html.twig',[
-           'controller_name' => 'DefaultController'
+           "registerform" => $registerForm->createView()
         ]);
 
 

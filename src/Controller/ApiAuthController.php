@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Utilisateurs;
+use App\Form\RegisterType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -14,6 +15,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Symfony\Component\Uid\Uuid;
 
 final class ApiAuthController extends AbstractController
 {
@@ -25,13 +27,7 @@ final class ApiAuthController extends AbstractController
         $password = $data['password'];
         $user = $UTILISATEURSRepository->findOneBy(['EMAIL' => $email]);
 
-        $csrfToken = new CsrfToken('login', $data['token']);
-
-        if (!$csrfTokenManager->isTokenValid($csrfToken)) {
-            return new JsonResponse(['error' => 'Invalid CSRF token'], 403);
-        }
-
-        if (!$user || $passwordHasher->isPasswordValid($user, $password)){
+        if (!$user || !$passwordHasher->isPasswordValid($user, $password)){
             return new JsonResponse(['message' => "Email ou mot de passe invalide veuillez re essayer,merci"]);
         }
 
@@ -41,39 +37,42 @@ final class ApiAuthController extends AbstractController
 
     #[Route('/api/register', name: 'app_api_auth_register',methods: ['POST'])]
     public function register(Request $request,EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher, CsrfTokenManagerInterface $csrfTokenManager){
-        $data = json_decode($request -> getContent(),true);
 
-        $csrfToken = new CsrfToken('register', $data['_token']);
-
-        if (!$csrfTokenManager->isTokenValid($csrfToken)) {
-            return new JsonResponse(['error' => 'Invalid CSRF token'], 403);
-        }
-
-
-        $pseudo = $data['pseudo'];
-        $email = $data['email'];
-        $age = $data['age'];
-        $password = $data['password'];
-        $ip = $request->getClientIp();
-        $iphash = hash('sha256', $ip);
 
         $user = new Utilisateurs();
-        $user->setPseudo($pseudo);
-        $user->setEMAIL($email);
-        $user->setAGE($age);
+
+
+
+        $ip = $request->getClientIp();
+        $iphash = hash('sha256', $ip);
         $user->setSUBSCRIBERS(0);
         $user->setUPLOADEDVIDEO(0);
         $user->setISADMIN(false);
         $user->setJOINDATE(new \DateTime());
-        $user->setIPADRESSE($iphash);
-        $hashedpassword = $passwordHasher -> hashPassword($user, $password);
-        $user->setPASSWORD($hashedpassword);
-        $em -> persist($user);
-        $em->flush();
 
 
-        $request -> getSession()->set('user_id', $user->getId());
-        return new JsonResponse(['message' => 'inscription réussie']);
+        $registerForm = $this->createForm(RegisterType::class, $user);
+        $registerForm->handleRequest($request);
+
+
+        if($registerForm->isSubmitted()&&$registerForm->isValid()){
+            $hashedpassword = $passwordHasher -> hashPassword($user, $user->getPassword());
+
+            $user->setPASSWORD($hashedpassword);
+            $user -> setUuid(Uuid::v7()->toRfc4122());
+            $em->persist($user);
+            $em->flush();
+            $user->setIPADRESSE($iphash);
+            return new JsonResponse(['message' => 'inscription réussie']);
+        }else {
+            // récupère les erreurs du formulaire
+            $errors = [];
+            foreach ($registerForm->getErrors(true) as $error) {
+                $errors[] = $error->getMessage();
+            }        //dd($request->request->all(), $registerForm->isSubmitted(), $registerForm->isValid());
+
+            return new JsonResponse(['message' => 'Erreur', 'errors' => $errors], 400);
+        }
 
 
 
