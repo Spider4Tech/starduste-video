@@ -1,0 +1,5 @@
+{% if app.user %}
+<p>vous êtes bien connecté : {{ app.user.username }}</p>
+{% else %}
+aucun utilisateur connecté
+{% endif %}

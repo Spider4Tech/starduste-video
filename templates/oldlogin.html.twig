@@ -2,7 +2,7 @@
     <form id="loginForm" method="post" action="/api/login">
         <input type="email" id="email" placeholder="Email" required>
         <input type="password" id="password" placeholder="Mot de passe" required>
-        <input type="hidden" name="_token" value="{{ csrf_token('login') }}">
+        <input type="hidden" name="token" value="{{ csrf_token('login') }}">
 
         <button type="submit">Login</button>
     </form>
@@ -16,7 +16,7 @@
 
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
-    _token: document.querySelector('input[name="_token"]').value
+
 
 
         const response = await fetch("/api/login", {
@@ -26,14 +26,15 @@
     },
     body: JSON.stringify({
     email: email,
-    password: password
+    password: password,
+    token: document.querySelector('input[name="token"]').value
     })
     });
 
     const data = await response.json();
 
     if(response.ok){
-    alert("test terminé avec succes")
+    alert("connexion terminé avec succes")
     } else {
     document.getElementById("error").innerText = data.message;
     }

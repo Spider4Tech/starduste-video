@@ -5,13 +5,14 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\Request;
 
 final class DefaultController extends AbstractController
 {
     #[Route('/login', name: 'app_login')]
     public function login(): Response
     {
-        return $this->render('login.html.twig', [
+        return $this->render('oldlogin.html.twig', [
             'controller_name' => 'DefaultController',
         ]);
     }
@@ -33,8 +34,36 @@ final class DefaultController extends AbstractController
 public function index(): Response{
 
 
-        return $this->render('base_video.html.twig');
+        return $this->render('acceuil.html.twig');
     }
+
+    #[Route('/watch', name: 'video_watch')]
+    public function watch(): Response{
+
+
+        return $this->render('/video_test/index.html.twig');
+    }
+
+
+    #[Route('/testsession', name: 'sessiontest')]
+    public function testsession(Request $request): Response{
+        $session = $request->getSession();
+
+        $alldata = $session->all();
+
+
+        return new Response('<pre>'. print_r($alldata, true).'</pre>');
+    }
+
+
+    #[Route('/testlogin', name: 'logintest')]
+    public function logintest(): Response{
+
+
+        return $this->render('/test/logintest.html.twig');
+    }
+
+
 
 
 

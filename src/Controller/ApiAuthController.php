@@ -18,20 +18,20 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 final class ApiAuthController extends AbstractController
 {
     #[Route('/api/login', name: 'app_api_auth_login',methods: ['POST'])]
-    public function login(Request $request, UtilisateursRepository $UTILISATEURSRepository, CsrfTokenManagerInterface $csrfTokenManager): Response
+    public function login(Request $request, UtilisateursRepository $UTILISATEURSRepository, CsrfTokenManagerInterface $csrfTokenManager, UserPasswordHasherInterface $passwordHasher): Response
     {
         $data = json_decode($request -> getContent(), true);
         $email = $data['email'];
         $password = $data['password'];
         $user = $UTILISATEURSRepository->findOneBy(['EMAIL' => $email]);
 
-        $csrfToken = new CsrfToken('login', $data['_token']);
+        $csrfToken = new CsrfToken('login', $data['token']);
 
         if (!$csrfTokenManager->isTokenValid($csrfToken)) {
             return new JsonResponse(['error' => 'Invalid CSRF token'], 403);
         }
 
-        if (!$user || $user->getPASSWORD() != $password ){
+        if (!$user || $passwordHasher->isPasswordValid($user, $password)){
             return new JsonResponse(['message' => "Email ou mot de passe invalide veuillez re essayer,merci"]);
         }
 

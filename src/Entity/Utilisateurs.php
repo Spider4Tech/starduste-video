@@ -7,10 +7,11 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UtilisateursRepository::class)]
-#[ORM\Table(name: "Users")]
-class Utilisateurs implements PasswordAuthenticatedUserInterface
+#[ORM\Table(name: "Utilisateurs")]
+class Utilisateurs implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -36,7 +37,7 @@ class Utilisateurs implements PasswordAuthenticatedUserInterface
     private ?bool $IS_ADMIN = null;
 
     #[ORM\Column]
-    #[Assert\NotBlank]
+    #[Assert\NotBlank(message: )]
     #[Assert\Range(min: 13, max: 120)]
     private ?int $AGE = null;
 
@@ -62,9 +63,22 @@ class Utilisateurs implements PasswordAuthenticatedUserInterface
     #[ORM\Column(nullable: true)]
     private ?\DateTime $LAST_LOGIN = null;
 
+    #[ORM\Column(nullable:true)]
+    private ?string $pfppath = null;
+
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getPfppath(): ?string
+    {
+        return $this->pfppath;
+    }
+
+    public function setPfppath(?string $pfppath): void
+    {
+        $this->pfppath = $pfppath;
     }
 
     public function getPseudo(): ?string
@@ -139,7 +153,7 @@ class Utilisateurs implements PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getPassword(): ?string
+    public function getPassword(): string
     {
         return $this->PASSWORD;
     }
@@ -184,5 +198,18 @@ class Utilisateurs implements PasswordAuthenticatedUserInterface
         $this->LAST_LOGIN = $LAST_LOGIN;
 
         return $this;
+    }
+
+    public function getRoles(): array
+    {
+        return $this->roles ?? ['ROLE_USER'];
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->EMAIL ;
+    }
+    public function eraseCredentials(): void
+    {
     }
 }
