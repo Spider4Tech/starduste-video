@@ -4,6 +4,7 @@
      {{ form_row(registerform.AGE) }}
      {{ form_row(registerform.EMAIL) }}
      {{ form_row(registerform.PASSWORD) }}
+     {{ form_widget(registerform._token) }}
      <button type="submit">Enregistrer</button>
      {{ form_end(registerform) }}
 

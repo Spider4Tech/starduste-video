@@ -30,9 +30,9 @@ class RegisterType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Utilisateurs::class,
-            'csrf_protection'=> true,
+            'csrf_protection'=> false,
             'csrf_field_name'=> '_token',
-            'csrf_token_id'=> 'register'
+            'csrf_token_id'=> 'submit'
         ]);
     }
 }

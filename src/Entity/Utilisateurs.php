@@ -27,20 +27,18 @@ class Utilisateurs implements UserInterface, PasswordAuthenticatedUserInterface
 
 
     #[ORM\Column(length: 24)]
-    #[Assert\Range(max: 24, maxMessage: "veuillez entrer un pseudo de moins de 24 lettres")]
+    #[Assert\Length(max: 24, maxMessage: "veuillez entrer un pseudo de moins de 24 lettres")]
     #[Assert\NotBlank(message: "veuillez entrer un pseudo")]
     private ?string $Pseudo = null;
 
     #[ORM\Column]
-    #[Assert\PositiveOrZero]
-    private ?int $SUBSCRIBERS = null;
+    private ?int $SUBSCRIBERS = 0;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTime $JOIN_DATE = null;
 
     #[ORM\Column]
-    #[Assert\PositiveOrZero]
-    private ?int $UPLOADED_VIDEO = null;
+    private ?int $UPLOADED_VIDEO = 0;
 
     #[ORM\Column(nullable: true)]
     private ?bool $IS_ADMIN = null;

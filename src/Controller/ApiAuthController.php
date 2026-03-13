@@ -38,31 +38,32 @@ final class ApiAuthController extends AbstractController
     #[Route('/api/register', name: 'app_api_auth_register',methods: ['POST'])]
     public function register(Request $request,EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher, CsrfTokenManagerInterface $csrfTokenManager){
 
+        // Valider le token CSRF
+        $token = $request->request->get('_token');
+        if (!$token || !$csrfTokenManager->isTokenValid(new CsrfToken('submit', $token))) {
+            return new JsonResponse(['message' => 'Erreur', 'errors' => ['Token CSRF invalide']], 400);
+        }
 
         $user = new Utilisateurs();
-
-
-
-        $ip = $request->getClientIp();
-        $iphash = hash('sha256', $ip);
-        $user->setSUBSCRIBERS(0);
-        $user->setUPLOADEDVIDEO(0);
-        $user->setISADMIN(false);
-        $user->setJOINDATE(new \DateTime());
-
 
         $registerForm = $this->createForm(RegisterType::class, $user);
         $registerForm->handleRequest($request);
 
 
         if($registerForm->isSubmitted()&&$registerForm->isValid()){
+            // Définir les valeurs après la validation du formulaire
+            $ip = $request->getClientIp();
+            $iphash = hash('sha256', $ip);
+            $user->setISADMIN(false);
+            $user->setJOINDATE(new \DateTime());
+            $user->setIPADRESSE($iphash);
+
             $hashedpassword = $passwordHasher -> hashPassword($user, $user->getPassword());
 
             $user->setPASSWORD($hashedpassword);
             $user -> setUuid(Uuid::v7()->toRfc4122());
             $em->persist($user);
             $em->flush();
-            $user->setIPADRESSE($iphash);
             return new JsonResponse(['message' => 'inscription réussie']);
         }else {
             // récupère les erreurs du formulaire
