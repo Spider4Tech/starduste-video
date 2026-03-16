@@ -5,7 +5,10 @@ security:
 
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
-        users_in_memory: { memory: null }
+        Starduste_provider:
+            entity:
+                class: App\Entity\Utilisateurs
+                property:  email
 
     firewalls:
         dev:
@@ -14,13 +17,16 @@ security:
             security: false
         main:
             lazy: true
-            provider: users_in_memory
+            provider: Starduste_provider
             form_login:
                 login_path: app_login
                 check_path: app_login
-                enable_csrf: true
+                username_parameter: email
+                password_parameter: _password
+                enable_csrf: false
             logout:
                 path: app_logout
+                target: app_login
                 # where to redirect after logout
                 # target: app_any_route
 
@@ -38,7 +44,7 @@ security:
 when@test:
     security:
         password_hashers:
-            App\Entity\UTILISATEURS:
+            App\Entity\Utilisateurs:
                 algorithm: argon2id
                 memory_cost : 64
                 time_cost: 3

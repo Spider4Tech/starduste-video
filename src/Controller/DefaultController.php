@@ -10,7 +10,7 @@ use App\Entity\Utilisateurs;
 use App\Form\RegisterType;
 final class DefaultController extends AbstractController
 {
-    #[Route('/login', name: 'app_login')]
+    #[Route('/oldlogin', name: 'oldapp_login')]
     public function login(): Response
     {
         return $this->render('oldlogin.html.twig', [
