@@ -1487,10 +1487,12 @@
         </button>
         {% if app.user %}
 
-            <button class="nav-btn" style="padding:4px; border-radius:50%; width:40px; height:40px;">
-                <img src="{{ asset(app.user.pfppath) }}"
-                     class="nav-avatar"
-                     alt="avatar">
+            <button class="nav-btn" onclick="toggleProfileModal()" style="padding:4px; border-radius:50%; width:40px; height:40px;">
+                {% if app.user.pfppath %}
+                <img src="{{ asset(app.user.pfppath) }}" class="nav-avatar" alt="avatar">
+                {% else %}
+                <img src="{{ asset('uploads/ProfilePictures/default-avatar-profile-icon-vector-social-media-user-portrait.webp') }}" class="nav-avatar" alt="avatar">
+                {% endif %}
             </button>
         {% else %}
 
@@ -1838,7 +1840,7 @@
 
 <!-- TOAST CONTAINER -->
 <div class="toast-container" id="toastContainer"></div>
-
+{% include '/partials/_profile_modal.html.twig' %}
 <!-- ========== SCRIPTS ========== -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 <script>
@@ -1849,7 +1851,7 @@
         { id: 3, title: "Le guide ultime de la cinématographie — Lumière et couleurs", channel: "ArtisanPixel", views: "2.8M", duration: "1:12:05", age: "2 semaines", verified: true, seed: "v3", avatar: "a3" },
         { id: 4, title: "Tokyo en 48h — Vlog immersif 4K", channel: "StellarDocs", views: "892K", duration: "23:15", age: "5 jours", verified: false, seed: "v4", avatar: "a4" },
         { id: 5, title: "Architecture microservices avec Docker et Kubernetes", channel: "DevOrbit", views: "334K", duration: "58:40", age: "2 jours", verified: true, seed: "v5", avatar: "a5" },
-        { id: 6, title: "Composition musicale — De l'idée au morceau complet", channel: "SoundForge", views: "671K", duration: "1:28:33", age: "1 mois", verified: false, seed: "v6", avatar: "a6" %},
+        { id: 6, title: "Composition musicale — De l'idée au morceau complet", channel: "SoundForge", views: "671K", duration: "1:28:33", age: "1 mois", verified: false, seed: "v6", avatar: "a6" },
         { id: 7, title: "Intelligence artificielle en 2025 — Ce qui a vraiment changé", channel: "NebulaAI", views: "4.1M", duration: "35:08", age: "1 semaine", verified: true, seed: "v7", avatar: "a7" },
         { id: 8, title: "Design System complet — Figma to Code en temps réel", channel: "UXNova", views: "228K", duration: "1:45:20", age: "4 jours", verified: false, seed: "v8", avatar: "a8" },
     ];
@@ -2104,7 +2106,18 @@
             setTimeout(() => toast.remove(), 300);
         }, 3000);
     }
-</script>
 
+    function toggleProfileModal() {
+        console.log('toggleProfileModal appelé');
+        const scene = document.getElementById('profileScene');
+        console.log('scene trouvée :', scene);
+        if (!scene) {
+            console.error('ERREUR : élément #profileScene introuvable !');
+            return;
+        }
+        scene.classList.toggle('active');
+        console.log('classes après toggle :', scene.className);
+    }
+</script>
 </body>
 </html>
