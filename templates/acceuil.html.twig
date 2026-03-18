@@ -1500,9 +1500,9 @@
             <i class="bi bi-person"></i>
             <span>Connexion</span>
         </button>
-        <button class="nav-btn nav-btn-primary" onclick="openModal('register')">
+        <button class="nav-btn nav-btn-primary" onclick="headingregister()">
             <i class="bi bi-plus-circle"></i>
-            <span>Créer</span>
+            <span>Créer un compte</span>
         </button>
         {% endif %}
     </div>
@@ -2089,6 +2089,10 @@
 
     function headingconnexion(){
         window.location = "/login"
+    }
+
+    function headingregister(){
+        window.location = "/register"
     }
 
     // ===== TOAST =====

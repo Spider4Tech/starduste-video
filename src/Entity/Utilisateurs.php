@@ -23,6 +23,19 @@ class Utilisateurs implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 36, unique: true)]
     private ?string $uuid = null;
 
+    #[ORM\Columnn(nullable: true, name: "Certified")]
+    private ?bool $certified = null;
+
+    public function getCertified(): ?bool
+    {
+        return $this->certified;
+    }
+
+    public function setCertified(?bool $certified): void
+    {
+        $this->certified = $certified;
+    }
+
 
 
 
