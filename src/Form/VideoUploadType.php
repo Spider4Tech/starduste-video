@@ -3,7 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Video;
-use Doctrine\DBAL\Types\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -17,7 +17,7 @@ class VideoUploadType extends AbstractType
     {
         $builder
             ->add('title', TextType::class)
-            ->add('video', FileType::class, [
+            ->add('videoFile', FileType::class, [
                 'label' => 'Video (MP4)',
                 'mapped' => false,
                 'required' => true,

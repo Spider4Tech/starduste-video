@@ -13,6 +13,19 @@ class Video
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\Column(length: 16, unique: true)]
+    private ?string $uuid = null;
+
+    public function getUuid(): ?string
+    {
+        return $this->uuid;
+    }
+
+    public function setUuid(?string $uuid): void
+    {
+        $this->uuid = $uuid;
+    }
+
     #[ORM\Column]
     private ?int $like_vid = null;
 

@@ -46,7 +46,7 @@ public function index(): Response{
     public function watch(): Response{
 
 
-        return $this->render('/video_test/index.html.twig');
+        return $this->render('/video_test/watch.html.twig');
     }
 
 

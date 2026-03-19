@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -10,11 +11,35 @@ use App\Form\VideoUploadType;
 
 final class UploadsController extends AbstractController
 {
-    #[Route('/videoupload', name: 'video_uploads')]
-    public function video(): Response
+    #[Route('/api/VideoUpload', name: 'video_uploads')]
+    public function uploadVideo(Request $request): Response
     {
-        return $this->render('video_upload.html.twig', [
+        $uploadform = $this->createForm(VideoUploadType::class);
+        $uploadform->handlerequest($request);
+        if ($uploadform->isSubmitted() && $uploadform->isvalid())
+        $file = $uploadform->get('videoFile')->getData();
+        if ($file){
+            $newfilename = bin2hex(random_bytes(16));
+            $destination =
+            $file->move();
+
+
+        }
+        else{
+
+        }
+
+
+
+
+
+
+
+
+
+        return $this->render('.html.twig', [
             'controller_name' => 'UploadsController',
+            'video' => $file
         ]);
     }
 
@@ -32,7 +57,7 @@ final class UploadsController extends AbstractController
     {
         return $this->render('short_upload.html.twig', [
             'controller_name' => 'UploadsController',
-            "upload_form" =>
+            //"upload_form" =>
         ]);
     }
 }
