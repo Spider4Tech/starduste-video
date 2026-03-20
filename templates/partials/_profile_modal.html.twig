@@ -503,7 +503,7 @@
                         {% endif %}
                         <i class="bi bi-patch-check-fill verified-badge"></i>
                     </div>
-                    <div class="profile-handle">{% if app.user %}membre depuis {{ app.user.Join_Date|date("d/m/y") }}{% else %}invité{% endif %}</div>
+                    <div class="profile-handle">{% if app.user %}membre depuis {{ app.user.JoinDate|date("d/m/y") }}{% else %}invité{% endif %}</div>
                 </div>
                 <div class="plan-chip">
                     <i class="bi bi-stars" style="font-size:12px"></i> Pro

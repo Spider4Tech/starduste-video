@@ -22,15 +22,15 @@ class VideoUploadType extends AbstractType
                 'mapped' => false,
                 'required' => true,
                 'constraints' => [
-                    new File([
-                        'maxSize' => '500G',
-                        'mimeTypes' => ['video/mp4'],
+                    new File(
+                        maxSize: '40G',
+                        mimeTypes: ['video/mp4']
 
-                    ]),
-                    new VideoConstraint([
-                        'maxPixels' => 2073600,
-                        'maxDuration' => 21600,
-                    ])
+                    ),
+                    /**new VideoConstraint(
+                        maxPixels: 2073600,
+
+                    )*/
                 ]
 
             ]);
@@ -41,6 +41,9 @@ class VideoUploadType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Video::class,
+            'csrf_protection'=> false,
+            'csrf_field_name'=> '_token',
+            'csrf_token_id'=> 'submit'
         ]);
     }
 }

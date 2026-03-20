@@ -26,6 +26,19 @@ class Video
         $this->uuid = $uuid;
     }
 
+    public function getIsShort(): ?string
+    {
+        return $this->isShort;
+    }
+
+    public function setIsShort(?string $isShort): void
+    {
+        $this->isShort = $isShort;
+    }
+    #[ORM\Column]
+    private ?string $isShort = null;
+
+
     #[ORM\Column]
     private ?int $like_vid = null;
 
