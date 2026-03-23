@@ -125,10 +125,10 @@
         .thumb-action-btn{width:34px;height:34px;background:rgba(10,10,15,0.85);border:1px solid var(--border);border-radius:50%;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.82rem;transition:background var(--transition);backdrop-filter:blur(4px);}
         .thumb-action-btn:hover{background:var(--accent);}
 
-        /* VISIBILITY CHECKBOX */
+        /* VISIBILITY TOGGLE — status = coché → publique */
         .priv-label{display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none;}
         .priv-check{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border-subtle);background:var(--bg-input);appearance:none;-webkit-appearance:none;flex-shrink:0;cursor:pointer;transition:all 0.2s ease;position:relative;}
-        .priv-check:checked{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);}
+        .priv-check:checked{background:var(--accent-3);border-color:var(--accent-3);box-shadow:0 0 0 3px rgba(52,211,153,0.25);}
         .priv-check::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='white' d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z'/%3E%3C/svg%3E") center/14px no-repeat;opacity:0;transition:opacity 0.15s ease;}
         .priv-check:checked::after{opacity:1;}
         #eyeIcon{transition:all 0.2s ease;}
@@ -231,6 +231,8 @@
         {# ===== COLONNE GAUCHE ===== #}
         <div>
             {{ form_start(uploadForm, {
+                'action': path('video_uploads'),
+                'method': 'POST',
                 'attr': {
                     'id': 'uploadForm',
                     'enctype': 'multipart/form-data',
@@ -318,10 +320,10 @@
                                 'attr': {
                                     'class': 'form-control',
                                     'placeholder': 'Donnez un titre accrocheur…',
-                                    'oninput': 'updateCharCount(this,\'titleCount\',28);updatePreviewTitle(this)'
+                                    'oninput': 'updateCharCount(this,\'titleCount\',128);updatePreviewTitle(this)'
                                 }
                             }) }}
-                            <span class="char-count" id="titleCount">0 / 28</span>
+                            <span class="char-count" id="titleCount">0 / 128</span>
                         </div>
                         {% if uploadForm.title.vars.errors|length %}
                             <ul class="form-errors">
@@ -376,7 +378,7 @@
                     <div class="panel-header-icon" style="background:rgba(52,211,153,0.1);color:var(--accent-3)"><i class="bi bi-image"></i></div>
                     <div>
                         <div class="panel-title">Miniature</div>
-                        <div class="panel-subtitle">JPG, PNG, WEBP — format 16:9 recommandé</div>
+                        <div class="panel-subtitle">JPG, PNG, WEBP — format 16:9 recommandé · max 10 Mo</div>
                     </div>
                 </div>
                 <div class="panel-body">
@@ -417,11 +419,15 @@
                 </div>
             </div>
 
-            {# --- VISIBILITÉ --- #}
+            {# --- VISIBILITÉ ---
+                 Le champ `status` est un CheckboxType avec data:true (coché = publique).
+                 Coché   → vidéo publique  (globe,  badge vert)
+                 Décoché → vidéo privée    (cadenas, badge violet)
+            #}
             <div class="panel">
                 <div class="panel-header">
                     <div class="panel-header-icon" style="background:rgba(124,106,247,0.1);color:var(--accent)">
-                        <i class="bi bi-eye" id="eyeIcon"></i>
+                        <i class="bi bi-globe2" id="eyeIcon"></i>
                     </div>
                     <div>
                         <div class="panel-title">Visibilité</div>
@@ -430,20 +436,20 @@
                 </div>
                 <div class="panel-body">
                     <label class="priv-label">
-                        {{ form_widget(uploadForm.isPrivate, {
+                        {{ form_widget(uploadForm.status, {
                             'attr': {
                                 'class': 'priv-check',
-                                'id': 'privateCheck',
+                                'id': 'statusCheck',
                                 'onchange': 'updateVisibility(this.checked)'
                             }
                         }) }}
                         <div>
                             <div style="font-size:0.9rem;font-weight:600;color:var(--text-primary);display:flex;align-items:center;gap:8px;">
-                                <i class="bi bi-lock-fill" style="color:var(--accent);font-size:0.84rem;"></i>
-                                Vidéo privée
+                                <i class="bi bi-globe2" style="color:var(--accent-3);font-size:0.84rem;" id="statusIcon"></i>
+                                <span id="statusLabel">Vidéo publique</span>
                             </div>
-                            <div style="font-size:0.77rem;color:var(--text-muted);margin-top:2px;">
-                                Cochez pour restreindre l'accès à vous seul
+                            <div style="font-size:0.77rem;color:var(--text-muted);margin-top:2px;" id="statusHint">
+                                Votre vidéo sera visible par tous
                             </div>
                         </div>
                     </label>
@@ -498,9 +504,10 @@
             <div class="tips-panel">
                 <div class="tips-header"><i class="bi bi-lightbulb-fill"></i> Conseils</div>
                 <div class="tip-item"><i class="bi bi-image"></i><span>Une miniature perso augmente les clics de <strong style="color:var(--text-secondary)">40%</strong>.</span></div>
-                <div class="tip-item"><i class="bi bi-type-bold"></i><span>Le titre est limité à <strong style="color:var(--text-secondary)">28 caractères</strong>, soyez percutant.</span></div>
+                <div class="tip-item"><i class="bi bi-type-bold"></i><span>Choisissez un titre court et <strong style="color:var(--text-secondary)">percutant</strong>.</span></div>
                 <div class="tip-item"><i class="bi bi-tag"></i><span>Choisissez la <strong style="color:var(--text-secondary)">catégorie la plus précise</strong> pour toucher votre audience.</span></div>
                 <div class="tip-item"><i class="bi bi-film"></i><span>Résolution recommandée : <strong style="color:var(--text-secondary)">1080p ou 4K</strong>.</span></div>
+                <div class="tip-item"><i class="bi bi-globe2"></i><span>Une vidéo <strong style="color:var(--text-secondary)">publique</strong> maximise votre portée dès la publication.</span></div>
             </div>
 
         </div>
@@ -618,32 +625,46 @@
         }
     }
 
-    // ===== VISIBILITÉ — œil barré si privée =====
-    function updateVisibility(isPrivate) {
-        const badge    = document.getElementById('previewBadge');
-        const eyeIcon  = document.getElementById('eyeIcon');
-        const subtitle = document.getElementById('visibilitySubtitle');
-        if (isPrivate) {
-            badge.className      = 'preview-badge badge-private';
-            badge.innerHTML      = '<i class="bi bi-lock-fill"></i> Privée';
-            eyeIcon.className    = 'bi bi-eye-slash';
-            subtitle.textContent = 'Accès restreint à vous seul';
+    // ===== VISIBILITÉ — status : coché = publique, décoché = privée =====
+    function updateVisibility(isPublic) {
+        const badge      = document.getElementById('previewBadge');
+        const eyeIcon    = document.getElementById('eyeIcon');
+        const statusIcon = document.getElementById('statusIcon');
+        const statusLabel= document.getElementById('statusLabel');
+        const statusHint = document.getElementById('statusHint');
+        const subtitle   = document.getElementById('visibilitySubtitle');
+
+        if (isPublic) {
+            badge.className       = 'preview-badge badge-public';
+            badge.innerHTML       = '<i class="bi bi-globe2"></i> Publique';
+            eyeIcon.className     = 'bi bi-globe2';
+            statusIcon.className  = 'bi bi-globe2';
+            statusIcon.style.color= 'var(--accent-3)';
+            statusLabel.textContent = 'Vidéo publique';
+            statusHint.textContent  = 'Votre vidéo sera visible par tous';
+            subtitle.textContent    = 'Publique par défaut';
         } else {
-            badge.className      = 'preview-badge badge-public';
-            badge.innerHTML      = '<i class="bi bi-globe2"></i> Publique';
-            eyeIcon.className    = 'bi bi-eye';
-            subtitle.textContent = 'Publique par défaut';
+            badge.className       = 'preview-badge badge-private';
+            badge.innerHTML       = '<i class="bi bi-lock-fill"></i> Privée';
+            eyeIcon.className     = 'bi bi-lock-fill';
+            statusIcon.className  = 'bi bi-lock-fill';
+            statusIcon.style.color= 'var(--accent)';
+            statusLabel.textContent = 'Vidéo privée';
+            statusHint.textContent  = 'Accès restreint à vous seul';
+            subtitle.textContent    = 'Accès restreint à vous seul';
         }
     }
 
     // ===== INIT (re-render après erreur Symfony) =====
     document.addEventListener('DOMContentLoaded', () => {
-        const titleEl = document.getElementById('{{ uploadForm.title.vars.id }}');
-        const descEl  = document.getElementById('{{ uploadForm.description.vars.id }}');
-        const privEl  = document.getElementById('privateCheck');
-        if (titleEl && titleEl.value) { updateCharCount(titleEl, 'titleCount', 28); updatePreviewTitle(titleEl); }
-        if (descEl  && descEl.value)  { updateCharCount(descEl, 'descCount', 1024); }
-        if (privEl  && privEl.checked) { updateVisibility(true); }
+        const titleEl  = document.getElementById('{{ uploadForm.title.vars.id }}');
+        const descEl   = document.getElementById('{{ uploadForm.description.vars.id }}');
+        const statusEl = document.getElementById('statusCheck');
+
+        if (titleEl  && titleEl.value)  { updateCharCount(titleEl, 'titleCount', 128); updatePreviewTitle(titleEl); }
+        if (descEl   && descEl.value)   { updateCharCount(descEl, 'descCount', 1024); }
+        // Applique l'état visuel selon la valeur actuelle du champ status
+        if (statusEl) { updateVisibility(statusEl.checked); }
     });
 
     // ===== TOAST =====

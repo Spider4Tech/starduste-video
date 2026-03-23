@@ -13,7 +13,7 @@ class Video
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 16, unique: true)]
+    #[ORM\Column(length: 32, unique: true)]
     private ?string $uuid = null;
 
     public function getUuid(): ?string
@@ -26,17 +26,17 @@ class Video
         $this->uuid = $uuid;
     }
 
-    public function getIsShort(): ?string
+    public function getIsShort(): ?bool
     {
         return $this->isShort;
     }
 
-    public function setIsShort(?string $isShort): void
+    public function setIsShort(?bool $isShort): void
     {
         $this->isShort = $isShort;
     }
     #[ORM\Column]
-    private ?string $isShort = null;
+    private ?bool $isShort = null;
 
 
     #[ORM\Column]
@@ -170,7 +170,7 @@ class Video
         return $this;
     }
 
-    public function isStatus(): ?bool
+    public function getStatus(): ?bool
     {
         return $this->status;
     }

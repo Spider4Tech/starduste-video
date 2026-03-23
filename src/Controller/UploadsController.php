@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Form\RegisterType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -11,11 +12,14 @@ use Symfony\Component\Routing\Attribute\Route;
 use App\Entity\Video;
 use App\Form\VideoUploadType;
 use Symfony\Component\Filesystem\Filesystem;
+use FFMpeg\FFProbe;
+use FFMpeg\FFMpeg;
+
 
 final class UploadsController extends AbstractController
 {
     #[Route('/api/VideoUpload', name: 'video_uploads')]
-    public function uploadVideo(Request $request): Response
+    public function uploadVideo(Request $request, EntityManagerInterface $em): Response
     {
         $ffprobe = \FFMpeg\FFProbe::create();
         $filesystem = new Filesystem();
@@ -25,21 +29,59 @@ final class UploadsController extends AbstractController
         $uploadform->handleRequest($request);
         if ($uploadform->isSubmitted() && $uploadform->isvalid()) {
             $file = $uploadform->get('videoFile')->getData();
+            $thumbnail = $uploadform->get('thumbnailFile')->getData();
 
             $fluxvideo = $ffprobe->streams($file->getPathname())->videos()->first();
             $width = $fluxvideo->get('width');
             $height = $fluxvideo->get('height');
+            $duration = $fluxvideo->get('duration');
+            $video = new Video();
 
             if ($file and $file->isValid()) {
-                $newfilename = bin2hex(random_bytes(16));
+                $uuid = bin2hex(random_bytes(16));
                 if ($height > $width) {
-                    $destination = $projectDir . '/public/uploads/shorts/' . $newfilename;
+                    $destination = $projectDir . '/public/uploads/shorts/' . $uuid;
                     if (!is_dir($destination)) {
                         mkdir($destination, 0775, true);
                     }
+                    $newthumbnailname = "";
+                    $thumbnailPath = "";
                     $extension = $file->guessExtension();
-                    $newfilename = $newfilename . '.' . $extension;
+                    $newfilename = $uuid . '.' . $extension;
                     $file->move($destination, $newfilename);
+                    $dbpath = 'uploads/shorts/'.$uuid.'/'.$newfilename;
+                    if ($thumbnail){
+                        $thumbnailextension = $thumbnail->guessExtension();
+                        $newthumbnailname = "Thumbnail".$uuid.'.'.$thumbnailextension;
+                        $thumbnail->move($destination, $newthumbnailname);
+                        $thumbnailPath = 'uploads/shorts/'.$uuid.'/'.$newthumbnailname;
+                    }
+                    else{
+                        $thumbnailPath = "uploads/fallbacksElement/FallbackThumbnail.webp";
+
+
+
+
+
+
+                    }
+                    $video = new Video();
+                    $video->setUuid($uuid);
+                    $video->setTitle($uploadform->get('title')->getData());
+                    $video->setStatus($uploadform->get('status')->getData());
+                    $video->setCategorie($uploadform->get('categorie')->getData());
+                    $video->setDescription($uploadform->get('description')->getData());
+                    $video->setVideoUrl($dbpath);
+                    $video->setLikeVid(0);
+                    $video->setDislikeVid(0);
+                    $video->setUploadDate(new \DateTime());
+                    $video->setThumbnail($thumbnailPath);
+                    $video->setIsShort(true);
+                    $video->setVideoDuration($duration);
+                    $em->persist($video);
+                    $em->flush();
+
+
                     return new JsonResponse(['message' => 'upload short reussi']);
 
                 }
@@ -52,7 +94,7 @@ final class UploadsController extends AbstractController
                     $extension = $file->guessExtension();
                     $newfilename = $newfilename . '.' . $extension;
                     $file->move($destination, $newfilename);
-                    return new JsonResponse(['message' => 'upload reussi']);
+                    return new JsonResponse(['message' => 'upload Video reussi']);
                 }
 
 
@@ -90,5 +132,7 @@ final class UploadsController extends AbstractController
             'uploadForm' => $registerForm->createView(),
 
         ]);
+
+
     }
 }
