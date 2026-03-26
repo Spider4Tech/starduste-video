@@ -498,7 +498,7 @@
                     <button class="scroll-btn scroll-btn-prev" onclick="scrollTrack('shortsTrack', -1)"><i class="bi bi-chevron-left"></i></button>
                     <div class="shorts-track" id="shortsTrack">
                         {% for short in shorts %}
-                            <a {# href="{{ path('app_watch', {'id': short.id}) }}"#} class="short-card">
+                            <a  href="{{ path('app_short', {'uuid': short.uuid}) }}" class="short-card">
                                 <div class="short-thumb">
                                     {% if short.thumbnail is defined and short.thumbnail%}
                                         <img src="{{ asset(short.thumbnail) }}" alt="{{ short.title }}" loading="lazy">
@@ -549,7 +549,7 @@
             {% if videos is defined and videos|length > 0 %}
                 <div class="video-grid">
                     {% for video in videos %}
-                        <a {# href="{{ path('app_watch', {'id': video.id}) }}"#} class="video-card" style="animation-delay:{{ loop.index0 * 0.05 }}s">
+                        <a  href="{{ path('app_watch', {'uuid': video.uuid}) }}" class="video-card" style="animation-delay:{{ loop.index0 * 0.05 }}s">
                             <div class="video-thumb">
                                 {% if video.thumbnail is defined and video.thumbnail %}
                                     <img src="{{ asset(video.thumbnail) }}" alt="{{ video.title }}" loading="lazy">

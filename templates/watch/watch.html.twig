@@ -1,5 +1,5 @@
 {# templates/video_test/controller.html.twig #}
-{% extends 'base_video.html.twig' %}
+{% extends '/base_video.html.twig' %}
 
 {% block body %}
     <div class="container mt-5">
@@ -13,16 +13,17 @@
                             id="starduste-player"
                             class="video-js vjs-big-play-centered vjs-fluid vjs-normalise-time-controls"
                             controls
-                            preload="auto"
+                            preload="metadata"
+                            controls crossorigin="anonymous"
                             poster="https://via.placeholder.com/1280x720/0a0a0f/6c5ce7?text=Starduste+Video">
-                            <source src="{{ asset('uploads/videos/output_dash/manifest.mpd') }}" type="application/dash+xml">
-                            <track src="{{ asset('uploads/subtitles/spinningNugget.vtt') }}" kind="subtitles" srclang="fr" label="Français">
+                            <source src="{{ asset(video.VideoUrl) }}" {# type="application/dash+xml"#}>
+                            {# <track src="{{ asset('uploads/subtitles/spinningNugget.vtt') }}" kind="subtitles" srclang="fr" label="Français">#}
                         </video>
                     </div>
 
                     <div class="mt-4">
                         <span class="badge" style="background: var(--accent-purple);">En local</span>
-                        <h1 class="mt-2" style="font-size: 2rem;">Test de visionnage : {{ video_title|default('Ma première vidéo Starduste') }}</h1>
+                        <h1 class="mt-2" style="font-size: 2rem;">{{ video.title }}</h1>
                         <div class="d-flex align-items-center mt-3 text-white-50">
                             <i class="bi bi-eye-fill me-2"></i> 0 vues • {{ "now"|date("d M. Y") }}
                         </div>
@@ -44,7 +45,7 @@
 {% endblock %}
 {% block javascripts %}
     {{ parent() }}
-    <script>
+     <script>
         // On s'assure que le DOM est chargé
         document.addEventListener('DOMContentLoaded', function() {
             var player = videojs('starduste-player', {

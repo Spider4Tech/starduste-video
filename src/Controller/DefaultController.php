@@ -43,6 +43,7 @@ public function index(VideoRepository $videoRepository): Response{
         foreach ($videos as $video){
             $videosData[] = [
               'id' => $video->getId(),
+              'uuid'=>$video->getUuid(),
               'title' => $video->getTitle(),
               'duration' => $video->getdurationformatted(),
               'views' => $video->getViews(),
@@ -59,6 +60,7 @@ public function index(VideoRepository $videoRepository): Response{
         foreach($shorts as $short){
             $shortsdata[] = [
                 'id' => $short->getId(),
+                'uuid'=>$short->getUuid(),
                 'title' => $short->getTitle(),
                 'duration' => $short->getdurationformatted(),
                 'views' => $short->getViews(),
