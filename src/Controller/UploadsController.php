@@ -86,14 +86,41 @@ final class UploadsController extends AbstractController
 
                 }
                 else {
-                    $destination = $projectDir . '/public/uploads/videos/' . $newfilename;
-
+                    $destination = $projectDir . '/public/uploads/videos/' . $uuid;
                     if (!is_dir($destination)) {
                         mkdir($destination, 0775, true);
                     }
+                    $newthumbnailname = "";
+                    $thumbnailPath = "";
                     $extension = $file->guessExtension();
-                    $newfilename = $newfilename . '.' . $extension;
+                    $newfilename = $uuid . '.' . $extension;
                     $file->move($destination, $newfilename);
+                    $dbpath = 'uploads/videos/'.$uuid.'/'.$newfilename;
+                    if ($thumbnail){
+                        $thumbnailextension = $thumbnail->guessExtension();
+                        $newthumbnailname = "Thumbnail".$uuid.'.'.$thumbnailextension;
+                        $thumbnail->move($destination, $newthumbnailname);
+                        $thumbnailPath = 'uploads/videos/'.$uuid.'/'.$newthumbnailname;
+                    }
+                    else{
+                        $thumbnailPath = "uploads/fallbacksElement/FallbackThumbnail.webp";
+
+                    }
+                    $video = new Video();
+                    $video->setUuid($uuid);
+                    $video->setTitle($uploadform->get('title')->getData());
+                    $video->setStatus($uploadform->get('status')->getData());
+                    $video->setCategorie($uploadform->get('categorie')->getData());
+                    $video->setDescription($uploadform->get('description')->getData());
+                    $video->setVideoUrl($dbpath);
+                    $video->setLikeVid(0);
+                    $video->setDislikeVid(0);
+                    $video->setUploadDate(new \DateTime());
+                    $video->setThumbnail($thumbnailPath);
+                    $video->setIsShort(false);
+                    $video->setVideoDuration($duration);
+                    $em->persist($video);
+                    $em->flush();
                     return new JsonResponse(['message' => 'upload Video reussi']);
                 }
 

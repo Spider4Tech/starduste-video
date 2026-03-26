@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\VideoRepository;
 use Doctrine\ORM\Mapping as ORM;
 
+
 #[ORM\Entity(repositoryClass: VideoRepository::class)]
 class Video
 {
@@ -68,6 +69,26 @@ class Video
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $categorie = null;
+
+    #[ORM\Column]
+    private ?int $views = null;
+
+
+
+    #[ORM\ManyToOne(targetEntity: Utilisateurs::class)]
+    #[ORM\JoinColumn(name: "uploader_id", referencedColumnName : "id", nullable: false)]
+    private  ?Utilisateurs $uploader = null;
+
+    public function getUploader(): ?Utilisateurs
+    {
+        return $this->uploader;
+    }
+
+    public function setUploader(?Utilisateurs $uploader): self
+    {
+        $this->uploader = $uploader;
+        return $this;
+    }
 
     public function getId(): ?int
     {
@@ -192,5 +213,37 @@ class Video
         $this->categorie = $categorie;
 
         return $this;
+    }
+
+    public function getViews(): ?int
+    {
+        return $this->views;
+    }
+
+    public function setViews(int $views): static
+    {
+        $this->views = $views;
+
+        return $this;
+    }
+
+
+
+    public function getdurationformatted(): string{
+        if ($this->video_duration === null){
+            return '0:00';
+        }
+
+        $hours = floor($this->video_duration / 3600);
+        $minute = floor(($this->video_duration / 3600) / 60);
+        $seconds = $this->video_duration % 60;
+
+        if ($hours > 0){
+            return sprintf('%d:%02d:%02d', $hours, $minute, $seconds);
+        }
+
+        return sprintf('%02d:%02d',  $minute, $seconds);
+
+
     }
 }
