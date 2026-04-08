@@ -1,0 +1,690 @@
+{# templates/video/upload.html.twig #}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Starduste — Publier une vidéo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f; --bg-secondary: #0f0f1a; --bg-card: #13131f;
+            --bg-hover: #1a1a2e; --bg-input: #16162a;
+            --accent: #7c6af7; --accent-2: #f97066; --accent-3: #34d399;
+            --accent-glow: rgba(124,106,247,0.35);
+            --text-primary: #f0f0ff; --text-secondary: #8888aa; --text-muted: #555570;
+            --border: rgba(124,106,247,0.15); --border-subtle: rgba(255,255,255,0.06);
+            --nav-h: 64px; --radius: 12px; --radius-sm: 8px;
+            --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+            --shadow-card: 0 4px 24px rgba(0,0,0,0.4);
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        html{scroll-behavior:smooth;}
+        body{font-family:'DM Sans',sans-serif;background:var(--bg-primary);color:var(--text-primary);min-height:100vh;overflow-x:hidden;}
+        body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.3;}
+        body::after{content:'';position:fixed;top:-30vh;left:-20vw;width:80vw;height:80vh;background:radial-gradient(ellipse,rgba(124,106,247,0.08) 0%,transparent 70%);pointer-events:none;z-index:0;}
+        ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--text-muted);border-radius:3px;}::-webkit-scrollbar-thumb:hover{background:var(--accent);}
+        h1,h2,h3,h4,h5{font-family:'Syne',sans-serif;}
+
+        /* NAVBAR */
+        .navbar{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:rgba(10,10,15,0.85);backdrop-filter:blur(20px) saturate(1.5);border-bottom:1px solid var(--border-subtle);z-index:1000;display:flex;align-items:center;padding:0 20px;gap:16px;}
+        .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;}
+        .logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;background:linear-gradient(135deg,#fff 0%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-0.03em;}
+        .nav-breadcrumb{display:flex;align-items:center;gap:8px;color:var(--text-muted);font-size:0.88rem;margin-left:16px;}
+        .nav-breadcrumb .current{color:var(--accent);font-weight:500;}
+        .nav-actions{margin-left:auto;}
+        .nav-btn{background:transparent;border:1px solid var(--border-subtle);color:var(--text-secondary);border-radius:100px;padding:8px 16px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:500;transition:all var(--transition);display:flex;align-items:center;gap:6px;text-decoration:none;}
+        .nav-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+        /* PAGE */
+        .page-wrapper{margin-top:var(--nav-h);padding:40px 24px 80px;position:relative;z-index:1;max-width:1100px;margin-left:auto;margin-right:auto;}
+
+        /* PAGE HEADER */
+        .page-header{display:flex;align-items:center;gap:20px;margin-bottom:40px;animation:fadeSlideDown 0.5s ease;}
+        .page-header-icon{width:56px;height:56px;background:linear-gradient(135deg,rgba(124,106,247,0.2),rgba(249,112,102,0.15));border:1px solid rgba(124,106,247,0.3);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:var(--accent);flex-shrink:0;}
+        .page-header-text h1{font-size:1.8rem;font-weight:800;letter-spacing:-0.03em;line-height:1.2;}
+        .page-header-text p{color:var(--text-muted);font-size:0.9rem;margin-top:4px;}
+
+        /* GRID */
+        .upload-grid{display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start;animation:fadeIn 0.5s ease 0.15s both;}
+
+        /* PANELS */
+        .panel{background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:20px;overflow:hidden;transition:border-color var(--transition);margin-bottom:24px;}
+        .panel:hover{border-color:var(--border);}
+        .panel-header{padding:20px 24px 16px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;gap:12px;}
+        .panel-header-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:0.95rem;flex-shrink:0;}
+        .panel-title{font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;}
+        .panel-subtitle{font-size:0.76rem;color:var(--text-muted);margin-top:1px;}
+        .panel-body{padding:24px;}
+
+        /* VIDEO DROPZONE */
+        .video-dropzone{border:2px dashed var(--border-subtle);border-radius:16px;padding:44px 24px;text-align:center;cursor:pointer;transition:all 0.3s ease;position:relative;overflow:hidden;background:var(--bg-secondary);}
+        .video-dropzone::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(124,106,247,0.07),transparent 70%);opacity:0;transition:opacity 0.3s ease;}
+        .video-dropzone:hover,.video-dropzone.drag-over{border-color:var(--accent);background:rgba(124,106,247,0.03);}
+        .video-dropzone:hover::before,.video-dropzone.drag-over::before{opacity:1;}
+        .dropzone-icon-wrap{width:76px;height:76px;margin:0 auto 18px;position:relative;}
+        .dropzone-icon-bg{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,rgba(124,106,247,0.15),rgba(249,112,102,0.1));border:1px solid rgba(124,106,247,0.25);display:flex;align-items:center;justify-content:center;font-size:1.9rem;color:var(--accent);transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);}
+        .video-dropzone:hover .dropzone-icon-bg{transform:scale(1.1);box-shadow:0 0 32px var(--accent-glow);}
+        .dropzone-orbit{position:absolute;top:-3px;right:-3px;width:20px;height:20px;background:var(--accent-2);border-radius:50%;border:2px solid var(--bg-card);display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:#fff;}
+        .dropzone-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:5px;}
+        .dropzone-sub{color:var(--text-muted);font-size:0.81rem;margin-bottom:18px;line-height:1.5;}
+        .dropzone-formats{display:flex;gap:6px;justify-content:center;margin-bottom:18px;}
+        .format-tag{padding:3px 10px;border-radius:100px;background:var(--bg-hover);border:1px solid var(--border-subtle);font-size:0.72rem;font-weight:600;color:var(--text-muted);letter-spacing:0.04em;}
+        .btn-browse{display:inline-flex;align-items:center;gap:8px;padding:10px 24px;background:var(--accent);color:#fff;border:none;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;transition:all var(--transition);}
+        .btn-browse:hover{background:#6b59e8;box-shadow:0 8px 24px var(--accent-glow);transform:translateY(-1px);}
+        .upload-progress-bar{margin-top:18px;background:var(--bg-hover);border-radius:100px;height:4px;overflow:hidden;display:none;}
+        .upload-progress-bar.active{display:block;}
+        .upload-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:100px;width:0%;transition:width 0.3s ease;}
+        .upload-progress-label{display:none;font-size:0.79rem;color:var(--text-secondary);margin-top:7px;}
+        .upload-progress-label.active{display:flex;justify-content:space-between;}
+        .file-selected-state{display:none;align-items:center;gap:14px;padding:13px 15px;background:rgba(52,211,153,0.05);border:1px solid rgba(52,211,153,0.2);border-radius:12px;margin-top:14px;}
+        .file-selected-state.active{display:flex;}
+        .file-icon{width:38px;height:38px;background:rgba(52,211,153,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;color:var(--accent-3);flex-shrink:0;}
+        .file-info{flex:1;min-width:0;}
+        .file-name{font-size:0.84rem;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .file-size{font-size:0.74rem;color:var(--text-muted);margin-top:2px;}
+        .file-remove{background:transparent;border:none;color:var(--text-muted);cursor:pointer;font-size:1rem;padding:4px;border-radius:6px;transition:color var(--transition),background var(--transition);}
+        .file-remove:hover{color:var(--accent-2);background:rgba(249,112,102,0.1);}
+
+        /* FORM FIELDS */
+        .form-group{margin-bottom:20px;}
+        .form-group:last-child{margin-bottom:0;}
+        .form-label{display:flex;align-items:center;gap:6px;font-size:0.81rem;font-weight:600;color:var(--text-secondary);margin-bottom:7px;letter-spacing:0.02em;}
+        .form-label i{color:var(--accent);font-size:0.84rem;}
+        .required-dot{width:5px;height:5px;background:var(--accent-2);border-radius:50%;display:inline-block;flex-shrink:0;}
+        .field-wrap{position:relative;}
+        .form-control{width:100%;background:var(--bg-input);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:12px 16px;color:var(--text-primary);font-family:'DM Sans',sans-serif;font-size:0.9rem;outline:none;transition:border-color var(--transition),box-shadow var(--transition);resize:none;}
+        .form-control::placeholder{color:var(--text-muted);}
+        .form-control:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);}
+        .char-count{position:absolute;right:12px;bottom:10px;font-size:0.71rem;color:var(--text-muted);pointer-events:none;}
+        .char-count.warn{color:var(--accent-2);}
+        textarea.form-control{min-height:106px;padding-bottom:28px;}
+        .select-wrap{position:relative;}
+        .select-wrap::after{content:'\F282';font-family:'bootstrap-icons';position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;font-size:0.85rem;transition:transform var(--transition);}
+        .select-wrap:focus-within::after{transform:translateY(-50%) rotate(180deg);}
+        select.form-control{appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:40px;}
+        select.form-control option{background:var(--bg-card);color:var(--text-primary);}
+
+        /* THUMBNAIL DROPZONE */
+        .thumb-dropzone{border:2px dashed var(--border-subtle);border-radius:12px;overflow:hidden;cursor:pointer;transition:all 0.3s ease;background:var(--bg-secondary);aspect-ratio:16/9;position:relative;display:flex;align-items:center;justify-content:center;}
+        .thumb-dropzone:hover,.thumb-dropzone.drag-over{border-color:var(--accent);}
+        .thumb-dropzone-inner{text-align:center;padding:20px;pointer-events:none;}
+        .thumb-dropzone-inner i{font-size:1.9rem;color:var(--text-muted);display:block;margin-bottom:8px;transition:color var(--transition);}
+        .thumb-dropzone:hover .thumb-dropzone-inner i{color:var(--accent);}
+        .thumb-dropzone-title{font-size:0.81rem;font-weight:600;color:var(--text-secondary);margin-bottom:3px;}
+        .thumb-dropzone-sub{font-size:0.73rem;color:var(--text-muted);}
+        .thumb-preview{position:absolute;inset:0;display:none;}
+        .thumb-preview.active{display:block;}
+        .thumb-preview img{width:100%;height:100%;object-fit:cover;}
+        .thumb-preview-actions{position:absolute;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;gap:12px;opacity:0;transition:opacity var(--transition);}
+        .thumb-dropzone:hover .thumb-preview-actions{opacity:1;}
+        .thumb-action-btn{width:34px;height:34px;background:rgba(10,10,15,0.85);border:1px solid var(--border);border-radius:50%;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.82rem;transition:background var(--transition);backdrop-filter:blur(4px);}
+        .thumb-action-btn:hover{background:var(--accent);}
+
+        /* VISIBILITY TOGGLE — status = coché → publique */
+        .priv-label{display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none;}
+        .priv-check{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border-subtle);background:var(--bg-input);appearance:none;-webkit-appearance:none;flex-shrink:0;cursor:pointer;transition:all 0.2s ease;position:relative;}
+        .priv-check:checked{background:var(--accent-3);border-color:var(--accent-3);box-shadow:0 0 0 3px rgba(52,211,153,0.25);}
+        .priv-check::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='white' d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z'/%3E%3C/svg%3E") center/14px no-repeat;opacity:0;transition:opacity 0.15s ease;}
+        .priv-check:checked::after{opacity:1;}
+        #eyeIcon{transition:all 0.2s ease;}
+
+        /* FORM ERRORS */
+        .form-errors{list-style:none;padding:0;margin:6px 0 0;}
+        .form-errors li{font-size:0.78rem;color:var(--accent-2);display:flex;align-items:center;gap:5px;}
+        .form-errors li::before{content:'\F33A';font-family:'bootstrap-icons';font-size:0.75rem;}
+
+        /* SIDE PANELS */
+        .side-panels{display:flex;flex-direction:column;gap:20px;}
+        .preview-card{background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:20px;overflow:hidden;}
+        .preview-thumb{aspect-ratio:16/9;background:linear-gradient(135deg,var(--bg-secondary),var(--bg-hover));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+        .preview-thumb-placeholder{text-align:center;color:var(--text-muted);}
+        .preview-thumb-img{position:absolute;inset:0;display:none;}
+        .preview-thumb-img.active{display:block;}
+        .preview-thumb-img img{width:100%;height:100%;object-fit:cover;}
+        .preview-thumb-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;}
+        .preview-play{width:42px;height:42px;background:rgba(124,106,247,0.9);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;color:#fff;backdrop-filter:blur(4px);}
+        .preview-meta{padding:14px 16px;}
+        .preview-title{font-size:0.87rem;font-weight:600;color:var(--text-primary);margin-bottom:4px;min-height:19px;}
+        .preview-channel{font-size:0.77rem;color:var(--text-muted);}
+        .preview-badge{display:inline-flex;align-items:center;gap:4px;font-size:0.69rem;font-weight:600;padding:2px 8px;border-radius:100px;margin-left:8px;vertical-align:middle;}
+        .badge-public{background:rgba(52,211,153,0.1);color:var(--accent-3);border:1px solid rgba(52,211,153,0.2);}
+        .badge-private{background:rgba(124,106,247,0.1);color:var(--accent);border:1px solid rgba(124,106,247,0.2);}
+        .tips-panel{background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:20px;overflow:hidden;}
+        .tips-header{padding:16px 20px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-size:0.87rem;font-weight:700;color:var(--accent);}
+        .tip-item{display:flex;gap:12px;padding:11px 20px;border-bottom:1px solid var(--border-subtle);font-size:0.79rem;color:var(--text-muted);line-height:1.4;}
+        .tip-item:last-child{border-bottom:none;}
+        .tip-item i{color:var(--accent);flex-shrink:0;margin-top:1px;}
+
+        /* SUBMIT */
+        .submit-section{padding:20px 24px;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+        .submit-info{display:flex;align-items:center;gap:10px;font-size:0.81rem;color:var(--text-muted);}
+        .submit-info i{color:var(--accent);}
+        .btn-publish{padding:12px 32px;background:var(--accent);color:#fff;border:none;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:0.92rem;font-weight:700;cursor:pointer;transition:all var(--transition);display:flex;align-items:center;gap:8px;position:relative;overflow:hidden;}
+        .btn-publish::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);transform:translateX(-100%);transition:transform 0.4s ease;}
+        .btn-publish:hover::before{transform:translateX(100%);}
+        .btn-publish:hover{background:#6b59e8;box-shadow:0 8px 28px var(--accent-glow);transform:translateY(-1px);}
+
+        /* TOAST */
+        .toast-container{position:fixed;bottom:24px;right:24px;z-index:3000;display:flex;flex-direction:column;gap:8px;}
+        .toast{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow-card);animation:slideInRight 0.3s ease;font-size:0.84rem;min-width:250px;}
+        .toast.success{border-color:rgba(52,211,153,0.4);}
+        .toast.success i{color:var(--accent-3);}
+        .toast.error{border-color:rgba(249,112,102,0.4);}
+        .toast.error i{color:var(--accent-2);}
+        .toast-exit{animation:slideOutRight 0.3s ease forwards;}
+
+        /* ANIMATIONS */
+        @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes fadeSlideDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes slideInRight{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+        @keyframes slideOutRight{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(24px)}}
+
+        /* RESPONSIVE */
+        @media(max-width:900px){.upload-grid{grid-template-columns:1fr;}.side-panels{display:grid;grid-template-columns:1fr 1fr;gap:16px;}}
+        @media(max-width:600px){.page-wrapper{padding:20px 16px 60px;}.side-panels{grid-template-columns:1fr;}.submit-section{flex-direction:column;align-items:stretch;}.btn-publish{justify-content:center;}}
+    </style>
+</head>
+<body>
+
+{# ===== NAVBAR ===== #}
+<nav class="navbar">
+    <a href="{{ path('app_index') }}" class="nav-logo">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="lg1" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#7c6af7"/><stop offset="100%" stop-color="#f97066"/></linearGradient></defs>
+            <circle cx="18" cy="18" r="17" fill="url(#lg1)" opacity="0.15"/>
+            <polygon points="14,11 28,18 14,25" fill="url(#lg1)"/>
+            <circle cx="10" cy="18" r="3" fill="url(#lg1)" opacity="0.7"/>
+            <circle cx="10" cy="11" r="1.5" fill="#7c6af7" opacity="0.5"/>
+            <circle cx="10" cy="25" r="1.5" fill="#f97066" opacity="0.5"/>
+        </svg>
+        <span class="logo-text">starduste</span>
+    </a>
+    <div class="nav-breadcrumb">
+        <i class="bi bi-chevron-right" style="font-size:0.75rem"></i>
+        <span class="current"><i class="bi bi-cloud-upload" style="margin-right:5px"></i>Publier une vidéo</span>
+    </div>
+    <div class="nav-actions">
+        <a href="javascript:history.back()" class="nav-btn">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+</nav>
+
+{# ===== PAGE ===== #}
+<div class="page-wrapper">
+
+    <div class="page-header">
+        <div class="page-header-icon"><i class="bi bi-cloud-upload-fill"></i></div>
+        <div class="page-header-text">
+            <h1>Publier une vidéo</h1>
+            <p>Partagez votre contenu avec la communauté Starduste</p>
+        </div>
+    </div>
+
+    <div class="upload-grid">
+
+        {# ===== COLONNE GAUCHE ===== #}
+        <div>
+            {{ form_start(uploadForm, {
+                'action': path('video_uploads'),
+                'method': 'POST',
+                'attr': {
+                    'id': 'uploadForm',
+                    'enctype': 'multipart/form-data',
+                    'novalidate': 'novalidate'
+                }
+            }) }}
+
+            {# --- FICHIER VIDÉO --- #}
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-header-icon" style="background:rgba(124,106,247,0.1);color:var(--accent)"><i class="bi bi-film"></i></div>
+                    <div>
+                        <div class="panel-title">Fichier vidéo</div>
+                        <div class="panel-subtitle">MP4 uniquement — max 40 Go</div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="video-dropzone" id="videoDropzone"
+                         onclick="document.getElementById('{{ uploadForm.videoFile.vars.id }}').click()"
+                         ondragover="handleDragOver(event,'videoDropzone')"
+                         ondragleave="handleDragLeave('videoDropzone')"
+                         ondrop="handleDrop(event,'{{ uploadForm.videoFile.vars.id }}','videoDropzone')">
+                        <div class="dropzone-icon-wrap">
+                            <div class="dropzone-icon-bg"><i class="bi bi-cloud-upload"></i></div>
+                            <div class="dropzone-orbit"><i class="bi bi-plus"></i></div>
+                        </div>
+                        <div class="dropzone-title">Déposez votre vidéo ici</div>
+                        <div class="dropzone-sub">ou cliquez pour parcourir vos fichiers<br>MP4 uniquement · max 40 Go</div>
+                        <div class="dropzone-formats"><span class="format-tag">MP4</span></div>
+                        <button type="button" class="btn-browse"
+                                onclick="event.stopPropagation();document.getElementById('{{ uploadForm.videoFile.vars.id }}').click()">
+                            <i class="bi bi-folder2-open"></i> Parcourir
+                        </button>
+                        <div class="upload-progress-bar" id="videoProgressBar">
+                            <div class="upload-progress-fill" id="videoProgressFill"></div>
+                        </div>
+                        <div class="upload-progress-label" id="videoProgressLabel">
+                            <span id="videoProgressText">Chargement...</span>
+                            <span id="videoProgressPercent">0%</span>
+                        </div>
+                    </div>
+
+                    <div class="file-selected-state" id="videoFileState">
+                        <div class="file-icon"><i class="bi bi-file-earmark-play-fill"></i></div>
+                        <div class="file-info">
+                            <div class="file-name" id="videoFileName">—</div>
+                            <div class="file-size" id="videoFileSize">—</div>
+                        </div>
+                        <button type="button" class="file-remove" onclick="removeVideoFile()">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </div>
+
+                    <div style="display:none">
+                        {{ form_widget(uploadForm.videoFile, {
+                            'attr': {'onchange': 'handleVideoSelect(event)'}
+                        }) }}
+                    </div>
+                    {% if uploadForm.videoFile.vars.errors|length %}
+                        <ul class="form-errors">
+                            {% for error in uploadForm.videoFile.vars.errors %}<li>{{ error.message }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# --- INFORMATIONS --- #}
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-header-icon" style="background:rgba(249,112,102,0.1);color:var(--accent-2)"><i class="bi bi-card-text"></i></div>
+                    <div>
+                        <div class="panel-title">Informations</div>
+                        <div class="panel-subtitle">Titre, description et catégorie</div>
+                    </div>
+                </div>
+                <div class="panel-body">
+
+                    {# Titre #}
+                    <div class="form-group">
+                        <label class="form-label" for="{{ uploadForm.title.vars.id }}">
+                            <i class="bi bi-type"></i> Titre <span class="required-dot"></span>
+                        </label>
+                        <div class="field-wrap">
+                            {{ form_widget(uploadForm.title, {
+                                'attr': {
+                                    'class': 'form-control',
+                                    'placeholder': 'Donnez un titre accrocheur…',
+                                    'oninput': 'updateCharCount(this,\'titleCount\',128);updatePreviewTitle(this)'
+                                }
+                            }) }}
+                            <span class="char-count" id="titleCount">0 / 128</span>
+                        </div>
+                        {% if uploadForm.title.vars.errors|length %}
+                            <ul class="form-errors">
+                                {% for error in uploadForm.title.vars.errors %}<li>{{ error.message }}</li>{% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+
+                    {# Description #}
+                    <div class="form-group">
+                        <label class="form-label" for="{{ uploadForm.description.vars.id }}">
+                            <i class="bi bi-text-paragraph"></i> Description
+                        </label>
+                        <div class="field-wrap">
+                            {{ form_widget(uploadForm.description, {
+                                'attr': {
+                                    'class': 'form-control',
+                                    'placeholder': 'Décrivez votre vidéo, ajoutez des liens, des crédits…',
+                                    'oninput': 'updateCharCount(this,\'descCount\',1024)'
+                                }
+                            }) }}
+                            <span class="char-count" id="descCount">0 / 1024</span>
+                        </div>
+                        {% if uploadForm.description.vars.errors|length %}
+                            <ul class="form-errors">
+                                {% for error in uploadForm.description.vars.errors %}<li>{{ error.message }}</li>{% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+
+                    {# Catégorie #}
+                    <div class="form-group">
+                        <label class="form-label" for="{{ uploadForm.categorie.vars.id }}">
+                            <i class="bi bi-tag"></i> Catégorie <span class="required-dot"></span>
+                        </label>
+                        <div class="select-wrap">
+                            {{ form_widget(uploadForm.categorie, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        {% if uploadForm.categorie.vars.errors|length %}
+                            <ul class="form-errors">
+                                {% for error in uploadForm.categorie.vars.errors %}<li>{{ error.message }}</li>{% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+
+            {# --- MINIATURE --- #}
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-header-icon" style="background:rgba(52,211,153,0.1);color:var(--accent-3)"><i class="bi bi-image"></i></div>
+                    <div>
+                        <div class="panel-title">Miniature</div>
+                        <div class="panel-subtitle">JPG, PNG, WEBP — format 16:9 recommandé · max 10 Mo</div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="thumb-dropzone" id="thumbDropzone"
+                         onclick="document.getElementById('{{ uploadForm.thumbnailFile.vars.id }}').click()"
+                         ondragover="handleDragOver(event,'thumbDropzone')"
+                         ondragleave="handleDragLeave('thumbDropzone')"
+                         ondrop="handleDrop(event,'{{ uploadForm.thumbnailFile.vars.id }}','thumbDropzone')">
+                        <div class="thumb-dropzone-inner" id="thumbDropzoneInner">
+                            <i class="bi bi-image-alt"></i>
+                            <div class="thumb-dropzone-title">Ajouter une miniature</div>
+                            <div class="thumb-dropzone-sub">Déposez ou cliquez • 16:9 recommandé</div>
+                        </div>
+                        <div class="thumb-preview" id="thumbPreview">
+                            <img src="" alt="Miniature" id="thumbPreviewImg">
+                            <div class="thumb-preview-actions">
+                                <button type="button" class="thumb-action-btn" title="Changer"
+                                        onclick="event.stopPropagation();document.getElementById('{{ uploadForm.thumbnailFile.vars.id }}').click()">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                </button>
+                                <button type="button" class="thumb-action-btn" title="Supprimer"
+                                        onclick="event.stopPropagation();removeThumb()">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:none">
+                        {{ form_widget(uploadForm.thumbnailFile, {
+                            'attr': {'onchange': 'handleThumbSelect(event)'}
+                        }) }}
+                    </div>
+                    {% if uploadForm.thumbnailFile.vars.errors|length %}
+                        <ul class="form-errors">
+                            {% for error in uploadForm.thumbnailFile.vars.errors %}<li>{{ error.message }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# --- VISIBILITÉ ---
+                 Le champ `status` est un CheckboxType avec data:true (coché = publique).
+                 Coché   → vidéo publique  (globe,  badge vert)
+                 Décoché → vidéo privée    (cadenas, badge violet)
+            #}
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-header-icon" style="background:rgba(124,106,247,0.1);color:var(--accent)">
+                        <i class="bi bi-globe2" id="eyeIcon"></i>
+                    </div>
+                    <div>
+                        <div class="panel-title">Visibilité</div>
+                        <div class="panel-subtitle" id="visibilitySubtitle">Publique par défaut</div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <label class="priv-label">
+                        {{ form_widget(uploadForm.status, {
+                            'attr': {
+                                'class': 'priv-check',
+                                'id': 'statusCheck',
+                                'onchange': 'updateVisibility(this.checked)'
+                            }
+                        }) }}
+                        <div>
+                            <div style="font-size:0.9rem;font-weight:600;color:var(--text-primary);display:flex;align-items:center;gap:8px;">
+                                <i class="bi bi-globe2" style="color:var(--accent-3);font-size:0.84rem;" id="statusIcon"></i>
+                                <span id="statusLabel">Vidéo publique</span>
+                            </div>
+                            <div style="font-size:0.77rem;color:var(--text-muted);margin-top:2px;" id="statusHint">
+                                Votre vidéo sera visible par tous
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            {# --- SUBMIT --- #}
+            <div class="submit-section">
+                <div class="submit-info">
+                    <i class="bi bi-info-circle"></i>
+                    <span>En publiant, vous acceptez les <a href="#" style="color:var(--accent)">Conditions d'utilisation</a></span>
+                </div>
+                <button type="submit" class="btn-publish">
+                    <i class="bi bi-rocket-takeoff-fill"></i> Publier
+                </button>
+            </div>
+
+            {{ form_end(uploadForm) }}
+        </div>
+
+        {# ===== COLONNE DROITE ===== #}
+        <div class="side-panels">
+
+            {# Aperçu #}
+            <div class="preview-card">
+                <div class="preview-thumb">
+                    <div class="preview-thumb-placeholder" id="previewPlaceholder">
+                        <i class="bi bi-play-circle" style="font-size:2.4rem;color:var(--text-muted)"></i>
+                        <div style="font-size:0.74rem;color:var(--text-muted);margin-top:6px">Aperçu</div>
+                    </div>
+                    <div class="preview-thumb-img" id="previewThumbImg">
+                        <img src="" alt="preview" id="previewThumbSrc">
+                    </div>
+                    <div class="preview-thumb-overlay">
+                        <div class="preview-play"><i class="bi bi-play-fill"></i></div>
+                    </div>
+                </div>
+                <div class="preview-meta">
+                    <div class="preview-title" id="previewTitle">
+                        <span style="color:var(--text-muted);font-weight:400;font-size:0.79rem">Titre de la vidéo...</span>
+                    </div>
+                    <div class="preview-channel">
+                        Votre chaîne
+                        <span class="preview-badge badge-public" id="previewBadge">
+                            <i class="bi bi-globe2"></i> Publique
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {# Conseils #}
+            <div class="tips-panel">
+                <div class="tips-header"><i class="bi bi-lightbulb-fill"></i> Conseils</div>
+                <div class="tip-item"><i class="bi bi-image"></i><span>Une miniature perso augmente les clics de <strong style="color:var(--text-secondary)">40%</strong>.</span></div>
+                <div class="tip-item"><i class="bi bi-type-bold"></i><span>Choisissez un titre court et <strong style="color:var(--text-secondary)">percutant</strong>.</span></div>
+                <div class="tip-item"><i class="bi bi-tag"></i><span>Choisissez la <strong style="color:var(--text-secondary)">catégorie la plus précise</strong> pour toucher votre audience.</span></div>
+                <div class="tip-item"><i class="bi bi-film"></i><span>Résolution recommandée : <strong style="color:var(--text-secondary)">1080p ou 4K</strong>.</span></div>
+                <div class="tip-item"><i class="bi bi-globe2"></i><span>Une vidéo <strong style="color:var(--text-secondary)">publique</strong> maximise votre portée dès la publication.</span></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+    // ===== DRAG & DROP =====
+    function handleDragOver(e, id) {
+        e.preventDefault();
+        document.getElementById(id).classList.add('drag-over');
+    }
+    function handleDragLeave(id) {
+        document.getElementById(id).classList.remove('drag-over');
+    }
+    function handleDrop(e, inputId, dropzoneId) {
+        e.preventDefault();
+        document.getElementById(dropzoneId).classList.remove('drag-over');
+        const files = e.dataTransfer.files;
+        if (!files.length) return;
+        const input = document.getElementById(inputId);
+        const dt = new DataTransfer();
+        dt.items.add(files[0]);
+        input.files = dt.files;
+        if (dropzoneId === 'videoDropzone') handleVideoSelect({ target: input });
+        else handleThumbSelect({ target: input });
+    }
+
+    // ===== VIDÉO =====
+    function handleVideoSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        document.getElementById('videoFileName').textContent = file.name;
+        document.getElementById('videoFileSize').textContent = formatBytes(file.size);
+        document.getElementById('videoFileState').classList.add('active');
+        simulateProgress();
+    }
+
+    function simulateProgress() {
+        const bar  = document.getElementById('videoProgressBar');
+        const fill = document.getElementById('videoProgressFill');
+        const lbl  = document.getElementById('videoProgressLabel');
+        const txt  = document.getElementById('videoProgressText');
+        const pct  = document.getElementById('videoProgressPercent');
+        bar.classList.add('active');
+        lbl.classList.add('active');
+        fill.style.background = 'linear-gradient(90deg,var(--accent),var(--accent-2))';
+        let progress = 0;
+        const iv = setInterval(() => {
+            progress += Math.random() * 12 + 3;
+            if (progress >= 100) {
+                progress = 100; clearInterval(iv);
+                txt.textContent = '✓ Prêt à publier';
+                pct.textContent = '100%';
+                fill.style.width = '100%';
+                fill.style.background = 'linear-gradient(90deg,var(--accent-3),#34d399)';
+                return;
+            }
+            fill.style.width = progress + '%';
+            pct.textContent = Math.round(progress) + '%';
+        }, 150);
+    }
+
+    function removeVideoFile() {
+        document.getElementById('videoFileState').classList.remove('active');
+        document.getElementById('videoProgressBar').classList.remove('active');
+        document.getElementById('videoProgressLabel').classList.remove('active');
+        document.getElementById('videoProgressFill').style.width = '0%';
+    }
+
+    // ===== MINIATURE =====
+    function handleThumbSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const src = e.target.result;
+            document.getElementById('thumbPreviewImg').src = src;
+            document.getElementById('thumbPreview').classList.add('active');
+            document.getElementById('thumbDropzoneInner').style.display = 'none';
+            document.getElementById('previewThumbSrc').src = src;
+            document.getElementById('previewThumbImg').classList.add('active');
+            document.getElementById('previewPlaceholder').style.display = 'none';
+            showToast('Miniature ajoutée !', 'success');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function removeThumb() {
+        document.getElementById('thumbPreview').classList.remove('active');
+        document.getElementById('thumbDropzoneInner').style.display = '';
+        document.getElementById('previewThumbImg').classList.remove('active');
+        document.getElementById('previewPlaceholder').style.display = '';
+    }
+
+    // ===== COMPTEUR DE CARACTÈRES =====
+    function updateCharCount(el, countId, max) {
+        const len = el.value.length;
+        const counter = document.getElementById(countId);
+        counter.textContent = len + ' / ' + max;
+        counter.classList.toggle('warn', len > max * 0.85);
+    }
+
+    // ===== APERÇU TITRE =====
+    function updatePreviewTitle(el) {
+        const pt  = document.getElementById('previewTitle');
+        const val = el.value.trim();
+        if (val) {
+            pt.textContent = val;
+            pt.style.color = 'var(--text-primary)';
+        } else {
+            pt.innerHTML = '<span style="color:var(--text-muted);font-weight:400;font-size:0.79rem">Titre de la vidéo...</span>';
+        }
+    }
+
+    // ===== VISIBILITÉ — status : coché = publique, décoché = privée =====
+    function updateVisibility(isPublic) {
+        const badge      = document.getElementById('previewBadge');
+        const eyeIcon    = document.getElementById('eyeIcon');
+        const statusIcon = document.getElementById('statusIcon');
+        const statusLabel= document.getElementById('statusLabel');
+        const statusHint = document.getElementById('statusHint');
+        const subtitle   = document.getElementById('visibilitySubtitle');
+
+        if (isPublic) {
+            badge.className       = 'preview-badge badge-public';
+            badge.innerHTML       = '<i class="bi bi-globe2"></i> Publique';
+            eyeIcon.className     = 'bi bi-globe2';
+            statusIcon.className  = 'bi bi-globe2';
+            statusIcon.style.color= 'var(--accent-3)';
+            statusLabel.textContent = 'Vidéo publique';
+            statusHint.textContent  = 'Votre vidéo sera visible par tous';
+            subtitle.textContent    = 'Publique par défaut';
+        } else {
+            badge.className       = 'preview-badge badge-private';
+            badge.innerHTML       = '<i class="bi bi-lock-fill"></i> Privée';
+            eyeIcon.className     = 'bi bi-lock-fill';
+            statusIcon.className  = 'bi bi-lock-fill';
+            statusIcon.style.color= 'var(--accent)';
+            statusLabel.textContent = 'Vidéo privée';
+            statusHint.textContent  = 'Accès restreint à vous seul';
+            subtitle.textContent    = 'Accès restreint à vous seul';
+        }
+    }
+
+    // ===== INIT (re-render après erreur Symfony) =====
+    document.addEventListener('DOMContentLoaded', () => {
+        const titleEl  = document.getElementById('{{ uploadForm.title.vars.id }}');
+        const descEl   = document.getElementById('{{ uploadForm.description.vars.id }}');
+        const statusEl = document.getElementById('statusCheck');
+
+        if (titleEl  && titleEl.value)  { updateCharCount(titleEl, 'titleCount', 128); updatePreviewTitle(titleEl); }
+        if (descEl   && descEl.value)   { updateCharCount(descEl, 'descCount', 1024); }
+        // Applique l'état visuel selon la valeur actuelle du champ status
+        if (statusEl) { updateVisibility(statusEl.checked); }
+    });
+
+    // ===== TOAST =====
+    function showToast(message, type = 'success') {
+        const c = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.className = 'toast ' + type;
+        const icon = type === 'success' ? 'check-circle-fill' : 'exclamation-circle-fill';
+        t.innerHTML = `<i class="bi bi-${icon}"></i> ${message}`;
+        c.appendChild(t);
+        setTimeout(() => { t.classList.add('toast-exit'); setTimeout(() => t.remove(), 300); }, 3000);
+    }
+
+    // ===== FORMAT BYTES =====
+    function formatBytes(b) {
+        if (b < 1024) return b + ' B';
+        if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' Ko';
+        if (b < 1024 * 1024 * 1024) return (b / 1024 / 1024).toFixed(1) + ' Mo';
+        return (b / 1024 / 1024 / 1024).toFixed(2) + ' Go';
+    }
+</script>
+</body>
+</html>

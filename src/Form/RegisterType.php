@@ -19,10 +19,10 @@ class RegisterType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('Pseudo', TextType::class)
-            ->add('AGE', IntegerType::class)
-            ->add('PASSWORD', PasswordType::class)
-            ->add('EMAIL', EmailType::class)
+            ->add('pseudo', TextType::class)
+            ->add('age', IntegerType::class)
+            ->add('password', PasswordType::class)
+            ->add('email', EmailType::class)
         ;
     }
 
@@ -30,9 +30,9 @@ class RegisterType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Utilisateurs::class,
-            'csrf_protection'=> true,
+            'csrf_protection'=> false,
             'csrf_field_name'=> '_token',
-            'csrf_token_id'=> 'register'
+            'csrf_token_id'=> 'submit'
         ]);
     }
 }

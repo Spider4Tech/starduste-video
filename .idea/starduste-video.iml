@@ -133,6 +133,9 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/zircote/swagger-php" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/polyfill-uuid" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/uid" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/evenement/evenement" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/php-ffmpeg/php-ffmpeg" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/spatie/temporary-directory" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -1,0 +1,453 @@
+{# templates/video_test/short.html.twig #}
+{% extends '/base_video.html.twig' %}
+
+{% block title %}{{ short.title }} — Starduste{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&family=Tektur:wght@400..900&display=swap');
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --accent-purple: #6c5ce7;
+            --accent-pink: #e84393;
+            --text-main: #ffffff;
+            --progress-track: rgba(255,255,255,0.15);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-main);
+            font-family: 'DM Sans', sans-serif;
+            height: 100dvh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ─── Layout principal ─── */
+        .shorts-layout {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            height: 100dvh;
+            padding: 20px;
+        }
+
+        /* ─── Wrapper vidéo (9:16) ─── */
+        .short-wrapper {
+            position: relative;
+            height: min(92dvh, 720px);
+            aspect-ratio: 9 / 16;
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,0.08),
+                0 30px 80px rgba(0,0,0,0.7),
+                0 0 60px rgba(108,92,231,0.15);
+            flex-shrink: 0;
+        }
+
+        /* La vidéo elle-même */
+        .short-wrapper video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* VideoJS override : pas de barre native, on la fait nous-mêmes */
+        .short-wrapper .video-js .vjs-control-bar { display: none !important; }
+        .short-wrapper .video-js .vjs-big-play-button { display: none !important; }
+        .short-wrapper .video-js { border-radius: 22px; overflow: hidden; }
+        .short-wrapper .video-js .vjs-tech {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+        }
+
+        /* ─── Overlay dégradé bas ─── */
+        .short-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                to top,
+                rgba(0,0,0,0.85) 0%,
+                rgba(0,0,0,0.3) 35%,
+                transparent 65%
+            );
+            pointer-events: none;
+            border-radius: 22px;
+        }
+
+        /* ─── Barre de progression verticale (droite) ─── */
+        .short-progress {
+            position: absolute;
+            top: 50%;
+            right: 14px;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 55%;
+            background: var(--progress-track);
+            border-radius: 3px;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .short-progress-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(180deg, var(--accent-pink), var(--accent-purple));
+            border-radius: 3px;
+            transition: height 0.1s linear;
+        }
+        .short-progress-thumb {
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, 50%);
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 50%;
+            bottom: 0%;
+            box-shadow: 0 0 8px var(--accent-purple);
+            transition: bottom 0.1s linear;
+        }
+
+        /* ─── Info bas de l'écran ─── */
+        .short-info {
+            position: absolute;
+            bottom: 20px;
+            left: 18px;
+            right: 40px;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .short-badge {
+            display: inline-block;
+            background: var(--accent-purple);
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-bottom: 8px;
+        }
+        .short-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            line-height: 1.25;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+            margin-bottom: 6px;
+        }
+        .short-meta {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.55);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ─── Bouton play/pause central ─── */
+        .short-play-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            width: 64px;
+            height: 64px;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(12px);
+            border: 1.5px solid rgba(255,255,255,0.25);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 15;
+            transition: transform 0.15s ease, opacity 0.2s ease;
+            opacity: 0;
+        }
+        .short-play-btn.visible { opacity: 1; }
+        .short-play-btn:hover { transform: translate(-50%, -50%) scale(1.1); }
+        .short-play-btn i { font-size: 1.6rem; color: #fff; }
+
+        /* Timer flottant (coin haut gauche) */
+        .short-timer {
+            position: absolute;
+            top: 16px;
+            left: 18px;
+            z-index: 15;
+            font-family: 'Tektur', monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.7);
+            background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(8px);
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            letter-spacing: 0.05em;
+        }
+
+        /* ─── Actions droite (hors vidéo) ─── */
+        .short-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 28px;
+        }
+        .short-action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            color: rgba(255,255,255,0.75);
+            transition: color 0.2s, transform 0.2s;
+            background: none;
+            border: none;
+        }
+        .short-action-btn:hover { color: #fff; transform: scale(1.12); }
+        .short-action-btn .action-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+            font-size: 1.2rem;
+            transition: background 0.2s;
+        }
+        .short-action-btn:hover .action-icon {
+            background: rgba(108,92,231,0.3);
+            border-color: var(--accent-purple);
+        }
+        .short-action-btn span {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+        .short-action-btn.liked .action-icon {
+            background: rgba(232,67,147,0.25);
+            border-color: var(--accent-pink);
+            color: var(--accent-pink);
+        }
+
+        /* Bouton publier (bas des actions) */
+        .publish-btn {
+            margin-top: 12px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+            border: none;
+            border-radius: 50px;
+            color: #fff;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 700;
+            font-size: 0.75rem;
+            padding: 10px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 20px rgba(108,92,231,0.35);
+        }
+        .publish-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 28px rgba(108,92,231,0.5);
+        }
+
+        /* ─── Responsive : masquer les actions sur très petit écran ─── */
+        @media (max-width: 520px) {
+            .short-actions { display: none; }
+            .shorts-layout { padding: 0; }
+            .short-wrapper {
+                height: 100dvh;
+                border-radius: 0;
+                aspect-ratio: unset;
+                width: 100%;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="shorts-layout">
+
+        {# ── Lecteur vertical ── #}
+        <div class="short-wrapper" id="short-container">
+
+            {# VideoJS #}
+            <video
+                id="starduste-short"
+                class="video-js vjs-fluid"
+                preload="auto"
+                playsinline
+                loop
+                poster="{{ short.thumbnailUrl ?? 'https://via.placeholder.com/405x720/0a0a0f/6c5ce7?text=Short' }}">
+                <source src="{{ asset(short.VideoUrl) }}">
+            </video>
+
+            {# Dégradé bas #}
+            <div class="short-overlay"></div>
+
+            {# Timer #}
+            <div class="short-timer" id="short-timer">0:00 / 0:00</div>
+
+            {# Bouton play/pause central #}
+            <div class="short-play-btn" id="short-play-btn">
+                <i class="bi bi-play-fill" id="short-play-icon"></i>
+            </div>
+
+            {# Barre de progression verticale #}
+            <div class="short-progress" id="short-progress">
+                <div class="short-progress-fill" id="short-progress-fill"></div>
+                <div class="short-progress-thumb" id="short-progress-thumb"></div>
+            </div>
+
+            {# Infos titre #}
+            <div class="short-info">
+                <div class="short-badge">Short</div>
+                <div class="short-title">{{ short.title }}</div>
+                <div class="short-meta">
+                    <i class="bi bi-eye-fill"></i> 0 vues
+                    <span>•</span>
+                    <i class="bi bi-calendar3"></i> {{ "now"|date("d M. Y") }}
+                </div>
+            </div>
+        </div>
+
+        {# ── Actions droite ── #}
+        <div class="short-actions">
+            <button class="short-action-btn" id="btn-like" title="J'aime">
+                <div class="action-icon"><i class="bi bi-heart-fill"></i></div>
+                <span>0</span>
+            </button>
+
+            <button class="short-action-btn" title="Commenter">
+                <div class="action-icon"><i class="bi bi-chat-fill"></i></div>
+                <span>0</span>
+            </button>
+
+            <button class="short-action-btn" title="Partager">
+                <div class="action-icon"><i class="bi bi-share-fill"></i></div>
+                <span>Partager</span>
+            </button>
+
+            <button class="short-action-btn" title="Vitesse de lecture" id="btn-speed">
+                <div class="action-icon"><i class="bi bi-speedometer2"></i></div>
+                <span id="speed-label">1×</span>
+            </button>
+
+            <button class="publish-btn">
+                <i class="bi bi-rocket-takeoff-fill"></i>
+                Publier
+            </button>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            /* ── Init VideoJS ── */
+            const player = videojs('starduste-short', {
+                controls: false,
+                autoplay: true,
+                muted: true,   // nécessaire pour autoplay navigateur
+                loop: true,
+            });
+
+            const playBtn    = document.getElementById('short-play-btn');
+            const playIcon   = document.getElementById('short-play-icon');
+            const fill       = document.getElementById('short-progress-fill');
+            const thumb      = document.getElementById('short-progress-thumb');
+            const progressEl = document.getElementById('short-progress');
+            const timerEl    = document.getElementById('short-timer');
+            let hideTimer;
+
+            /* ── Helpers ── */
+            const fmt = s => {
+                const m = Math.floor(s / 60);
+                const sec = Math.floor(s % 60).toString().padStart(2, '0');
+                return `${m}:${sec}`;
+            };
+
+            /* ── Play / Pause au clic sur la vidéo ── */
+            document.getElementById('short-container').addEventListener('click', function (e) {
+                if (e.target.closest('.short-progress') || e.target.closest('.short-actions')) return;
+                if (player.paused()) {
+                    player.play();
+                } else {
+                    player.pause();
+                }
+            });
+
+            player.on('play', () => {
+                playIcon.className = 'bi bi-pause-fill';
+                showPlayBtn();
+            });
+            player.on('pause', () => {
+                playIcon.className = 'bi bi-play-fill';
+                showPlayBtn(true); // reste visible en pause
+            });
+
+            function showPlayBtn(stay = false) {
+                playBtn.classList.add('visible');
+                clearTimeout(hideTimer);
+                if (!stay) {
+                    hideTimer = setTimeout(() => playBtn.classList.remove('visible'), 900);
+                }
+            }
+
+            /* ── Barre de progression ── */
+            player.on('timeupdate', () => {
+                const pct = player.duration() ? (player.currentTime() / player.duration()) * 100 : 0;
+                fill.style.height  = pct + '%';
+                thumb.style.bottom = pct + '%';
+                timerEl.textContent = fmt(player.currentTime()) + ' / ' + fmt(player.duration() || 0);
+            });
+
+            /* Clic sur la barre verticale pour se positionner */
+            progressEl.addEventListener('click', function (e) {
+                const rect = progressEl.getBoundingClientRect();
+                const ratio = 1 - (e.clientY - rect.top) / rect.height;
+                player.currentTime(ratio * player.duration());
+            });
+
+            /* ── Like toggle ── */
+            document.getElementById('btn-like').addEventListener('click', function () {
+                this.classList.toggle('liked');
+            });
+
+            /* ── Vitesse de lecture ── */
+            const speeds = [0.5, 1, 1.5, 2];
+            let speedIdx = 1;
+            document.getElementById('btn-speed').addEventListener('click', function () {
+                speedIdx = (speedIdx + 1) % speeds.length;
+                player.playbackRate(speeds[speedIdx]);
+                document.getElementById('speed-label').textContent = speeds[speedIdx] + '×';
+            });
+
+            player.ready(function () {
+                console.log('Starduste Short — prêt !');
+            });
+        });
+    </script>
+{% endblock %}

@@ -23,56 +23,67 @@ class Utilisateurs implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 36, unique: true)]
     private ?string $uuid = null;
 
+    #[ORM\Column(nullable: true, name: "Certified")]
+    private ?bool $certified = null;
+
+    public function getCertified(): ?bool
+    {
+        return $this->certified;
+    }
+
+    public function setCertified(?bool $certified): void
+    {
+        $this->certified = $certified;
+    }
 
 
 
-    #[ORM\Column(length: 24)]
-    #[Assert\Range(max: 24, maxMessage: "veuillez entrer un pseudo de moins de 24 lettres")]
+
+    #[ORM\Column(length: 24, name: "PSEUDO")]
+    #[Assert\Length(max: 24, maxMessage: "veuillez entrer un pseudo de moins de 24 lettres")]
     #[Assert\NotBlank(message: "veuillez entrer un pseudo")]
-    private ?string $Pseudo = null;
+    private ?string $pseudo = null;
 
-    #[ORM\Column]
-    #[Assert\PositiveOrZero]
-    private ?int $SUBSCRIBERS = null;
+    #[ORM\Column(name: "SUBSCRIBERS")]
+    private ?int $subscribers = 0;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTime $JOIN_DATE = null;
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true, name: "JOIN_DATE")]
+    private ?\DateTime $joinDate = null;
 
-    #[ORM\Column]
-    #[Assert\PositiveOrZero]
-    private ?int $UPLOADED_VIDEO = null;
+    #[ORM\Column(name: "UPLOADED_VIDEO")]
+    private ?int $uploadedVideo = 0;
 
-    #[ORM\Column(nullable: true)]
-    private ?bool $IS_ADMIN = null;
+    #[ORM\Column(nullable: true, name: "IS_ADMIN")]
+    private ?bool $isAdmin = null;
 
-    #[ORM\Column]
+    #[ORM\Column(name: "AGE")]
     #[Assert\NotBlank]
     #[Assert\Range(min: 13, max: 120, notInRangeMessage: "veuillez entrer un age entre 13 et 120 ans")]
-    private ?int $AGE = null;
+    private ?int $age = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, name: "PASSWORD")]
     #[Assert\NotBlank]
     #[Assert\Length(min: 8, max: 64)]
     #[Assert\Regex(
         pattern: "/^(?=.*[A-Za-z])(?=.*\d)(?=.*[\W_]).+$/",
         message: "Le mot de passe doit contenir au moins une lettre un chiffre et un symbole."
     )]
-    private ?string $PASSWORD = null;
+    private ?string $password = null;
 
-    #[ORM\Column(length: 50, unique: true)]
+    #[ORM\Column(length: 50, unique: true, name: "EMAIL")]
     #[Assert\Email]
     #[Assert\Length(max : 50)]
     #[Assert\NotBlank]
-    private ?string $EMAIL = null;
+    private ?string $email = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(length: 255, nullable: true, name: "IP_ADRESSE")]
     #[Assert\Ip]
-    private ?string $IP_ADRESSE = null;
+    private ?string $ipAdresse = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?\DateTime $LAST_LOGIN = null;
+    #[ORM\Column(nullable: true, name: "LAST_LOGIN")]
+    private ?\DateTime $lastLogin = null;
 
-    #[ORM\Column(nullable:true)]
+    #[ORM\Column(nullable:true, name: "pfppath")]
     private ?string $pfppath = null;
 
     public function getUuid(): ?string
@@ -100,119 +111,119 @@ class Utilisateurs implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getPseudo(): ?string
     {
-        return $this->Pseudo;
+        return $this->pseudo;
     }
 
-    public function setPseudo(string $Pseudo): static
+    public function setPseudo(string $pseudo): static
     {
-        $this->Pseudo = $Pseudo;
+        $this->pseudo = $pseudo;
 
         return $this;
     }
 
-    public function getSUBSCRIBERS(): ?int
+    public function getSubscribers(): ?int
     {
-        return $this->SUBSCRIBERS;
+        return $this->subscribers;
     }
 
-    public function setSUBSCRIBERS(int $SUBSCRIBERS): static
+    public function setSubscribers(int $subscribers): static
     {
-        $this->SUBSCRIBERS = $SUBSCRIBERS;
+        $this->subscribers = $subscribers;
 
         return $this;
     }
 
-    public function getJOINDATE(): ?\DateTime
+    public function getJoinDate(): ?\DateTime
     {
-        return $this->JOIN_DATE;
+        return $this->joinDate;
     }
 
-    public function setJOINDATE(?\DateTime $JOIN_DATE): static
+    public function setJoinDate(?\DateTime $joinDate): static
     {
-        $this->JOIN_DATE = $JOIN_DATE;
+        $this->joinDate = $joinDate;
 
         return $this;
     }
 
-    public function getUPLOADEDVIDEO(): ?int
+    public function getUploadedVideo(): ?int
     {
-        return $this->UPLOADED_VIDEO;
+        return $this->uploadedVideo;
     }
 
-    public function setUPLOADEDVIDEO(int $UPLOADED_VIDEO): static
+    public function setUploadedVideo(int $uploadedVideo): static
     {
-        $this->UPLOADED_VIDEO = $UPLOADED_VIDEO;
+        $this->uploadedVideo = $uploadedVideo;
 
         return $this;
     }
 
-    public function iSADMIN(): ?bool
+    public function isAdmin(): ?bool
     {
-        return $this->IS_ADMIN;
+        return $this->isAdmin;
     }
 
-    public function setISADMIN(?bool $IS_ADMIN): static
+    public function setIsAdmin(?bool $isAdmin): static
     {
-        $this->IS_ADMIN = $IS_ADMIN;
+        $this->isAdmin = $isAdmin;
 
         return $this;
     }
 
-    public function getAGE(): ?int
+    public function getAge(): ?int
     {
-        return $this->AGE;
+        return $this->age;
     }
 
-    public function setAGE(int $AGE): static
+    public function setAge(int $age): static
     {
-        $this->AGE = $AGE;
+        $this->age = $age;
 
         return $this;
     }
 
     public function getPassword(): string
     {
-        return $this->PASSWORD ?? '';
+        return $this->password ?? '';
     }
 
-    public function setPASSWORD(string $PASSWORD): static
+    public function setPassword(string $password): static
     {
-        $this->PASSWORD = $PASSWORD;
+        $this->password = $password;
         return $this;
     }
 
-    public function getEMAIL(): ?string
+    public function getEmail(): ?string
     {
-        return $this->EMAIL;
+        return $this->email;
     }
 
-    public function setEMAIL(string $EMAIL): static
+    public function setEmail(string $email): static
     {
-        $this->EMAIL = $EMAIL;
-
-        return $this;
-    }
-
-    public function getIPADRESSE(): ?string
-    {
-        return $this->IP_ADRESSE;
-    }
-
-    public function setIPADRESSE(?string $IP_ADRESSE): static
-    {
-        $this->IP_ADRESSE = $IP_ADRESSE;
+        $this->email = $email;
 
         return $this;
     }
 
-    public function getLASTLOGIN(): ?\DateTime
+    public function getIpAdresse(): ?string
     {
-        return $this->LAST_LOGIN;
+        return $this->ipAdresse;
     }
 
-    public function setLASTLOGIN(?\DateTime $LAST_LOGIN): static
+    public function setIpAdresse(?string $ipAdresse): static
     {
-        $this->LAST_LOGIN = $LAST_LOGIN;
+        $this->ipAdresse = $ipAdresse;
+
+        return $this;
+    }
+
+    public function getLastLogin(): ?\DateTime
+    {
+        return $this->lastLogin;
+    }
+
+    public function setLastLogin(?\DateTime $lastLogin): static
+    {
+        $this->lastLogin = $lastLogin;
 
         return $this;
     }
@@ -224,7 +235,7 @@ class Utilisateurs implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUserIdentifier(): string
     {
-        return $this->EMAIL ;
+        return $this->email ;
     }
     public function eraseCredentials(): void
     {
