@@ -1,19 +1,297 @@
-{% block register %}
-     {{ form_start(registerform, {attr: {id: 'registerform'}}) }}
-     {{ form_row(registerform.Pseudo) }}
-     {{ form_row(registerform.AGE) }}
-     {{ form_row(registerform.EMAIL) }}
-     {{ form_row(registerform.PASSWORD) }}
-     {{ form_widget(registerform._token) }}
-     <button type="submit">Enregistrer</button>
-     {{ form_end(registerform) }}
+{# {% extends '../base_video.html.twig' %}#}
 
-     <p id="error"></p>
+{% block title %}{% endblock %}
+
+{% block body %}
+    <style>
+        /* ===== CSS VARIABLES (reprises de Starduste) ===== */
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #0f0f1a;
+            --bg-card: #13131f;
+            --bg-hover: #1a1a2e;
+            --bg-input: #16162a;
+            --accent: #7c6af7;
+            --accent-2: #f97066;
+            --accent-glow: rgba(124, 106, 247, 0.35);
+            --text-primary: #f0f0ff;
+            --text-secondary: #8888aa;
+            --text-muted: #555570;
+            --border: rgba(124, 106, 247, 0.15);
+            --border-subtle: rgba(255,255,255,0.06);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Ambient glow background */
+        body::after {
+            content: '';
+            position: fixed;
+            top: -30vh;
+            left: -20vw;
+            width: 80vw;
+            height: 80vh;
+            background: radial-gradient(ellipse, rgba(124,106,247,0.08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ===== REGISTER WRAPPER ===== */
+        .register-page {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 16px;
+        }
+
+        .register-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 440px;
+            padding: 40px 36px;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+            animation: fadeSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* ===== LOGO ===== */
+        .register-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 28px;
+            text-decoration: none;
+        }
+
+        .logo-text {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.6rem;
+            background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.03em;
+        }
+
+        /* ===== HEADER TEXT ===== */
+        .register-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 6px;
+            letter-spacing: -0.02em;
+        }
+
+        .register-sub {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            margin-bottom: 28px;
+        }
+
+        /* ===== FORM FIELDS ===== */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        /* Override Symfony's default form labels */
+        .form-group label,
+        label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        /* Override Symfony's default form inputs */
+        .form-group input,
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"] {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 11px 14px;
+            color: var(--text-primary);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        input[type="number"]:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Symfony wraps each field in a div — on cible la structure générée */
+        div[id^="registerform_"] {
+            margin-bottom: 16px;
+        }
+
+        /* ===== SUBMIT BUTTON ===== */
+        .btn-register,
+        button[type="submit"] {
+            width: 100%;
+            padding: 13px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button[type="submit"]:hover {
+            background: #6b59e8;
+            box-shadow: 0 8px 24px var(--accent-glow);
+            transform: translateY(-1px);
+        }
+
+        /* ===== ERROR MESSAGE ===== */
+        #error {
+            margin-top: 14px;
+            padding: 10px 14px;
+            background: rgba(249, 112, 102, 0.1);
+            border: 1px solid rgba(249, 112, 102, 0.3);
+            border-radius: var(--radius-sm);
+            color: var(--accent-2);
+            font-size: 0.85rem;
+            text-align: center;
+            display: none;
+        }
+
+        #error:not(:empty) {
+            display: block;
+            animation: fadeSlideUp 0.2s ease;
+        }
+
+        /* ===== LOGIN LINK ===== */
+        .register-switch {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .register-switch a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color var(--transition);
+        }
+
+        .register-switch a:hover {
+            color: #a899ff;
+        }
+
+        /* ===== ANIMATION ===== */
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+
+    <!-- Google Fonts (si pas déjà chargé dans base_video.html.twig) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <div class="register-page">
+        <div class="register-box">
+
+            <!-- Logo -->
+            <a href="/" class="register-logo">
+                <svg width="32" height="32" viewBox="0 0 3ffv c6 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="lg1" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stop-color="#7c6af7"/>
+                            <stop offset="100%" stop-color="#f97066"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="18" cy="18" r="17" fill="url(#lg1)" opacity="0.15"/>
+                    <polygon points="14,11 28,18 14,25" fill="url(#lg1)"/>
+                    <circle cx="10" cy="18" r="3" fill="url(#lg1)" opacity="0.7"/>
+                    <circle cx="10" cy="11" r="1.5" fill="#7c6af7" opacity="0.5"/>
+                    <circle cx="10" cy="25" r="1.5" fill="#f97066" opacity="0.5"/>
+                </svg>
+                <span class="logo-text">starduste</span>
+            </a>
+
+            <h1 class="register-title">Rejoindre Starduste</h1>
+            <p class="register-sub">Créez votre compte créateur gratuitement</p>
+
+            {{ form_start(registerform, {attr: {id: 'registerform'}}) }}
+            {{ form_row(registerform.pseudo) }}
+            {{ form_row(registerform.age) }}
+            {{ form_row(registerform.email) }}
+            {{ form_label(registerform.password) }}
+            {{ form_widget(registerform.password, {'attr': {'id': 'password'}}) }}
+            {{ form_errors(registerform.password) }}
+            {# <input type="checkbox" onclick="showpassword()"> Afficher le mot de passe
+            #}            {# {{ form_widget(registerform._token) }}#}
+
+            <button type="submit">
+                Créer mon compte
+            </button>
+            {{ form_end(registerform) }}
+
+            <p id="error"></p>
+
+            <div class="register-switch">
+                Déjà un compte ? <a href="/login">Se connecter</a>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.getElementById("registerform").addEventListener("submit", async function(e) {
+            e.preventDefault();
 
-            e.preventDefault(); // empêche le rechargement de la page
             const form = document.getElementById("registerform");
+            const errorEl = document.getElementById("error");
+            const btn = form.querySelector("button[type='submit']");
+
+            // Feedback visuel pendant la requête
+            btn.textContent = "Chargement...";
+            btn.disabled = true;
+            errorEl.textContent = "";
 
             const response = await fetch("/api/register", {
                 method: "POST",
@@ -25,14 +303,26 @@
 
             const data = await response.json();
 
-            if(response.ok){
-                alert("test terminé avec succes")
+            if (response.ok) {
+                btn.textContent = "✓ Compte créé !";
+                btn.style.background = "#34d399";
+                // Redirection après 1s (adapte l'URL selon ta route)
+                setTimeout(() => window.location.href = "/", 1000);
             } else {
-                document.getElementById("error").innerText = data.message || "Une erreur est survenue";
+                errorEl.textContent = data.message || "Une erreur est survenue";
+                btn.textContent = "🚀 Créer mon compte";
+                btn.disabled = false;
+
+
             }
-
         });
+        function showpassword() {
+            var x = document.getElementById("password");
+            if (x.type === "password") {
+                x.type = "text";
+            } else {
+                x.type = "password";
+            }
+        }
     </script>
-
-
 {% endblock %}

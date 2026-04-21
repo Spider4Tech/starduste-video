@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\VideoRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 
@@ -71,13 +73,24 @@ class Video
     private ?string $categorie = null;
 
     #[ORM\Column]
-    private ?int $views = null;
+    private ?int $views = 0;
 
 
 
     #[ORM\ManyToOne(targetEntity: Utilisateurs::class)]
-    #[ORM\JoinColumn(name: "uploader_id", referencedColumnName : "id", nullable: false)]
+    #[ORM\JoinColumn(name: "uploader_id", referencedColumnName : "id", nullable: true)]
     private  ?Utilisateurs $uploader = null;
+
+    /**
+     * @var Collection<int, Comments>
+     */
+    #[ORM\OneToMany(targetEntity: Comments::class, mappedBy: 'ComVideo')]
+    private Collection $Comments;
+
+    public function __construct()
+    {
+        $this->Comments = new ArrayCollection();
+    }
 
     public function getUploader(): ?Utilisateurs
     {
@@ -245,5 +258,35 @@ class Video
         return sprintf('%02d:%02d',  $minute, $seconds);
 
 
+    }
+
+    /**
+     * @return Collection<int, Comments>
+     */
+    public function getComments(): Collection
+    {
+        return $this->Comments;
+    }
+
+    public function addComment(Comments $comment): static
+    {
+        if (!$this->Comments->contains($comment)) {
+            $this->Comments->add($comment);
+            $comment->setComVideo($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComment(Comments $comment): static
+    {
+        if ($this->Comments->removeElement($comment)) {
+            // set the owning side to null (unless already changed)
+            if ($comment->getComVideo() === $this) {
+                $comment->setComVideo(null);
+            }
+        }
+
+        return $this;
     }
 }

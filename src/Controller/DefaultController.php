@@ -48,7 +48,7 @@ public function index(VideoRepository $videoRepository): Response{
               'duration' => $video->getdurationformatted(),
               'views' => $video->getViews(),
               'thumbnail' => $video->getThumbnail(),
-              'uploaderpfp' => $video->getUploader()->getPfppath(),
+              'uploaderpfp' => $video->getUploader()->getpfppath(),
               'uploaderusername' => $video->getUploader()->getPseudo(),
 
 

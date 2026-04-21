@@ -14,6 +14,7 @@ use App\Form\VideoUploadType;
 use Symfony\Component\Filesystem\Filesystem;
 use FFMpeg\FFProbe;
 use FFMpeg\FFMpeg;
+use App\Entity\Utilisateurs;
 
 
 final class UploadsController extends AbstractController
@@ -27,6 +28,8 @@ final class UploadsController extends AbstractController
 
         $uploadform = $this->createForm(VideoUploadType::class);
         $uploadform->handleRequest($request);
+        $user = $this->getUser();
+        $userid = $user->getId();
         if ($uploadform->isSubmitted() && $uploadform->isvalid()) {
             $file = $uploadform->get('videoFile')->getData();
             $thumbnail = $uploadform->get('thumbnailFile')->getData();
@@ -71,6 +74,7 @@ final class UploadsController extends AbstractController
                     $video->setStatus($uploadform->get('status')->getData());
                     $video->setCategorie($uploadform->get('categorie')->getData());
                     $video->setDescription($uploadform->get('description')->getData());
+                    $video->setViews(0);
                     $video->setVideoUrl($dbpath);
                     $video->setLikeVid(0);
                     $video->setDislikeVid(0);
@@ -78,6 +82,7 @@ final class UploadsController extends AbstractController
                     $video->setThumbnail($thumbnailPath);
                     $video->setIsShort(true);
                     $video->setVideoDuration($duration);
+                    $video->setUploader($user);
                     $em->persist($video);
                     $em->flush();
 
@@ -119,6 +124,7 @@ final class UploadsController extends AbstractController
                     $video->setThumbnail($thumbnailPath);
                     $video->setIsShort(false);
                     $video->setVideoDuration($duration);
+                    $video->setUploader($user);
                     $em->persist($video);
                     $em->flush();
                     return new JsonResponse(['message' => 'upload Video reussi']);

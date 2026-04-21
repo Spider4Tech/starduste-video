@@ -355,7 +355,7 @@
                 {% if app.user.pfppath %}
                     <img src="{{ asset(app.user.pfppath) }}" class="nav-avatar" alt="avatar">
                 {% else %}
-                    <img src="{{ asset('uploads/ProfilePictures/default-avatar-profile-icon-vector-social-media-user-portrait.webp') }}" class="nav-avatar" alt="avatar">
+                     <img src="{{ asset('uploads/fallbacksElement/FallbackPFP.png') }}" class="nav-avatar" alt="avatar">
                 {% endif %}
             </button>
         {% else %}
@@ -569,7 +569,7 @@
                             </div>
                             <div class="video-info">
                                 <div class="video-avatar">
-                                    {% if video.uploaderpfp is defined and video.uploaderpfp is defined and video.uploaderpfp %}
+                                    {% if video.uploaderpfp %}
                                         <img src="{{ asset(video.uploaderpfp) }}" alt="" loading="lazy">
                                     {% else %}
                                         <img src="{{ asset('uploads/ProfilePictures/default-avatar-profile-icon-vector-social-media-user-portrait.webp') }}" alt="avatar" loading="lazy">

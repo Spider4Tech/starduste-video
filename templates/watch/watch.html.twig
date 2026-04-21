@@ -5,37 +5,106 @@
     <div class="container mt-5">
         <div class="row">
             <div class="col-lg-8">
+                {# --- LECTEUR VIDÉO --- #}
                 <div class="glass-card mb-4">
                     <div class="video-container" style="border-radius: 15px; overflow: hidden; box-shadow: 0 10px 30px rgba(108, 92, 231, 0.2);">
-                        {# vjs-big-play-centered : met le bouton au milieu #}
-                        {# vjs-fluid : adapte la taille automatiquement #}
                         <video
                             id="starduste-player"
                             class="video-js vjs-big-play-centered vjs-fluid vjs-normalise-time-controls"
                             controls
                             preload="metadata"
-                            controls crossorigin="anonymous"
                             poster="https://via.placeholder.com/1280x720/0a0a0f/6c5ce7?text=Starduste+Video">
-                            <source src="{{ asset(video.VideoUrl) }}" {# type="application/dash+xml"#}>
-                            {# <track src="{{ asset('uploads/subtitles/spinningNugget.vtt') }}" kind="subtitles" srclang="fr" label="Français">#}
+                            <source src="{{ asset(video.VideoUrl) }}">
                         </video>
                     </div>
 
                     <div class="mt-4">
-                        <span class="badge" style="background: var(--accent-purple);">En local</span>
-                        <h1 class="mt-2" style="font-size: 2rem;">{{ video.title }}</h1>
-                        <div class="d-flex align-items-center mt-3 text-white-50">
-                            <i class="bi bi-eye-fill me-2"></i> 0 vues • {{ "now"|date("d M. Y") }}
+                        <h1 class="syne" style="font-size: 1.8rem;">{{ video.title }}</h1>
+
+                        {# --- BARRE D'INFOS & ACTIONS --- #}
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mt-3">
+                            <div class="text-white-50">
+                                <i class="bi bi-eye-fill me-2"></i> {{ video.views}} vues • {{ "now"|date("d M. Y") }}
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button class="btn-action">
+                                    <i class="bi bi-hand-thumbs-up-fill"></i> <span>{{ video.likevid }}</span>
+                                </button>
+                                <button class="btn-action">
+                                    <i class="bi bi-hand-thumbs-down"></i> <span>{{ video.dislikevid }}</span>
+                                </button>
+                                <button class="btn-action">
+                                    <i class="bi bi-share"></i> Partager
+                                </button>
+                            </div>
                         </div>
+
+                        <hr style="border-color: rgba(255,255,255,0.1); margin: 25px 0;">
+
+                        {# --- PROFIL DE L'UPLOADEUR --- #}
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="profile-placeholder me-3">
+                                    {% if video.getUploader.pfppath %}
+                                    <img src="{{ asset(video.uploader.Pfppath) }}" alt="Avatar" class="rounded-circle" width="48">
+                                    {% else %}
+                                    <img src="{{ asset('uploads/fallbacksElement/FallbackPFP.png') }}" alt="Avatar" class="rounded-circle" width="48">
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <h5 class="mb-0 syne" style="font-size: 1.1rem;">{{ video.getUploader.Pseudo }}</h5>
+                                    <p class="small text-white-50 mb-0">{{ video.uploader.subscribers }} abonnés</p>
+                                </div>
+                            </div>
+                            <button class="btn-subscribe">S'abonner</button>
+                        </div>
+                    </div>
+                </div>
+
+                {# --- SECTION COMMENTAIRES --- #}
+                <div class="glass-card mb-5">
+                    <h3 class="syne mb-4" style="font-size: 1.3rem;">Commentaires</h3>
+
+                    {# Input nouveau commentaire #}
+                    <div class="d-flex gap-3 mb-5">
+                        <img src="https://ui-avatars.com/api/?name=Moi&background=333&color=fff" alt="Avatar" class="rounded-circle" width="40" height="40">
+                        <div class="flex-grow-1">
+                            <textarea class="comment-input" placeholder="Ajouter un commentaire..." rows="1"></textarea>
+                            <div class="d-flex justify-content-end mt-2">
+                                <button class="btn-comment">Commenter</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Liste des commentaires (Exemple statique) #}
+                    <div class="comment-list">
+                        {% for i in 1..3 %}
+                            <div class="d-flex gap-3 mb-4">
+                                <img src="https://ui-avatars.com/api/?name=User+{{ i }}&background=random" alt="Avatar" class="rounded-circle" width="40" height="40">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="fw-bold small">Utilisateur_{{ i }}</span>
+                                        <span class="text-white-50" style="font-size: 0.75rem;">il y a 2h</span>
+                                    </div>
+                                    <p class="mb-2" style="font-size: 0.95rem; opacity: 0.9;">C'est vraiment une vidéo incroyable, le lecteur Starduste est super fluide ! 🚀</p>
+                                    <div class="d-flex align-items-center gap-3 text-white-50 small">
+                                        <span class="cursor-pointer"><i class="bi bi-hand-thumbs-up"></i> 12</span>
+                                        <span class="cursor-pointer">Répondre</span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
 
+            {# --- COLONNE DROITE (Suggestions) --- #}
             <div class="col-lg-4">
-                <div class="glass-card">
+                <div class="glass-card mb-4">
                     <h3 class="syne mb-3" style="font-size: 1.2rem; color: var(--accent-purple);">À propos du test</h3>
                     <p class="small text-white-50">Ce fichier est servi par Symfony via le dossier <code>public/uploads/videos/</code>.</p>
-                    <button class="btn w-100 mt-3" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; border: none; border-radius: 10px; font-weight: 600;">
+                    <button class="btn w-100 mt-3 btn-main">
                         <i class="bi bi-rocket-takeoff me-2"></i> Publier une vidéo
                     </button>
                 </div>
@@ -43,49 +112,98 @@
         </div>
     </div>
 {% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Styles pour les boutons d'action (Like/Dislike) */
+        .btn-action {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 6px 15px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+        .btn-action:hover {
+            background: rgba(108, 92, 231, 0.2);
+            border-color: var(--accent-purple);
+        }
+
+        /* Bouton s'abonner */
+        .btn-subscribe {
+            background: white;
+            color: black;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .btn-subscribe:hover {
+            background: var(--accent-purple);
+            color: white;
+        }
+
+        /* Input commentaire */
+        .comment-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 5px 0;
+            outline: none;
+            transition: 0.3s;
+        }
+        .comment-input:focus {
+            border-bottom-color: var(--accent-purple);
+        }
+
+        .btn-comment {
+            background: var(--accent-purple);
+            color: white;
+            border: none;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .btn-main {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            padding: 10px;
+        }
+
+        .cursor-pointer { cursor: pointer; }
+    </style>
+{% endblock %}
+
 {% block javascripts %}
     {{ parent() }}
-     <script>
-        // On s'assure que le DOM est chargé
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             var player = videojs('starduste-player', {
-                playbackRates: [0.25,0.5, 1, 1.5, 2,2.5],
-                // On active explicitement les contrôles
-                controls: true,
+                playbackRates: [0.5, 1, 1.5, 2],
+                fluid: true,
                 controlBar: {
-                    // C'est ici qu'on force la naissance des composants
                     children: [
                         'playToggle',
-                        {name: 'volumePanel', inline: false},
+                        'volumePanel',
                         'progressControl',
-                        'liveDisplay',
-                        'remainingTimeDisplay',
                         'currentTimeDisplay',
                         'timeDivider',
                         'durationDisplay',
                         'playbackRateMenuButton',
-                        'subsCapsButton',
                         'fullscreenToggle'
                     ]
-
                 }
-            });
-
-            player.ready(function (){
-                player.qualityLevels();
-
-                player.hlsQualitySelector({
-                    displayCurrentQuality: false
-                });
-                console.log("changeur de qualité activé")
-            });
-
-            // Petit check pour confirmer dans la console
-            player.ready(function() {
-                console.log("Lecteur Starduste prêt !");
-                console.log("Composant Duration :", player.controlBar.durationDisplay);
             });
         });
     </script>
 {% endblock %}
-
