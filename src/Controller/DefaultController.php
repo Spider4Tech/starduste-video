@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Repository\CommentsRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -80,7 +81,7 @@ public function index(VideoRepository $videoRepository): Response{
     public function watch(): Response{
 
 
-        return $this->render('/video_test/watch.html.twig');
+        return $this->render('/watch/watch.html.twig');
     }
 
 

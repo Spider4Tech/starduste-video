@@ -17,17 +17,24 @@ class Comments
     private ?string $commentaire = null;
 
     #[ORM\Column]
-    private ?int $comlike = null;
+    private ?int $comlike = 0;
 
     #[ORM\Column]
-    private ?int $comdislike = null;
+    private ?int $comdislike = 0;
 
     #[ORM\Column(nullable: true)]
     private ?bool $favorited = null;
 
-    #[ORM\ManyToOne(inversedBy: 'Comments')]
-    #[ORM\JoinColumn(name: "video_id", nullable: false)]
+    #[ORM\ManyToOne(targetEntity: Video::class)]
+    #[ORM\JoinColumn(name: "CommentVideoId",referencedColumnName: "uuid", nullable: false)]
     private ?Video $ComVideo = null;
+
+    #[ORM\ManyToOne(targetEntity: Utilisateurs::class)]
+    #[ORM\JoinColumn(name: "CommentUploaderId", referencedColumnName: "id" ,nullable: false)]
+    private ?Utilisateurs $CommentUploader = null;
+
+    #[ORM\Column]
+    private ?\DateTime $Date_Comment = null;
 
     public function getId(): ?int
     {
@@ -91,6 +98,30 @@ class Comments
     public function setComVideo(?Video $ComVideo): static
     {
         $this->ComVideo = $ComVideo;
+
+        return $this;
+    }
+
+    public function getCommentUploader(): ?Utilisateurs
+    {
+        return $this->CommentUploader;
+    }
+
+    public function setCommentUploader(?Utilisateurs $CommentUploader): static
+    {
+        $this->CommentUploader = $CommentUploader;
+
+        return $this;
+    }
+
+    public function getDateComment(): ?\DateTime
+    {
+        return $this->Date_Comment;
+    }
+
+    public function setDateComment(\DateTime $Date_Comment): static
+    {
+        $this->Date_Comment = $Date_Comment;
 
         return $this;
     }

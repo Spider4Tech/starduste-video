@@ -2,6 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Comments;
+use App\Form\CommentType;
+use App\Repository\CommentsRepository;
 use App\Repository\VideoRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -11,12 +14,42 @@ use Symfony\Component\Routing\Attribute\Route;
 final class WatchController extends AbstractController
 {
     #[Route('/watch/{uuid}', name: 'app_watch', requirements: ['uuid'=>'[0-9a-fA-F]{32}'],  methods: ['GET'])]
-    public function watchvideo($uuid, VideoRepository $videorepo): Response
+    public function watchvideo($uuid, VideoRepository $videorepo, CommentsRepository $commentsRepository): Response
     {
         $video = $videorepo->findOneBy(['uuid' => $uuid]);
 
+        $comment = new Comments();
+
+        $Commentform = $this->createForm(CommentType::class, $comment , [
+            'action' => $this->generateUrl('comment_add', ['uuid' => $uuid]),
+            'method' => 'POST',
+        ]);
+
+        $segments = explode('/', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'));
+
+        $comments = $commentsRepository->findBy(['ComVideo' => $uuid]);
+        $commentsData = [];
+        foreach ($comments as $comment){
+            $commentsData[] = [
+                'id' => $comment->getId(),
+                'ComText' => $comment->getCommentaire(),
+                'Likes' => $comment->getComlike(),
+                'Dislikes' => $comment->getComdislike(),
+                'Date' => $comment->getDateComment(),
+                'uploaderpfp' => $comment->getCommentUploader()->getPfppath(),
+                'uploaderUsername' => $comment->getCommentUploader()->getPseudo()
+
+
+
+
+
+            ];
+        }
+
         return $this->render('watch/watch.html.twig', [
-            'video' => $video
+            'video' => $video,
+            'Commentaires' => $commentsData,
+            'CommentForm' => $Commentform->createView(),
         ]);
     }
 
