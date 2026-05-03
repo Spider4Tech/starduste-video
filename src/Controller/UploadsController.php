@@ -168,4 +168,19 @@ final class UploadsController extends AbstractController
 
 
     }
+
+    #[Route('/commentupload', name: 'comment_upload')]
+    public function comment_upload(Request $request, EntityManagerInterface $em): JsonResponse
+    {
+
+        $data = json_decode($request->getContent(), true);
+
+
+        return $this->render('short_upload.html.twig', [
+            'controller_name' => 'UploadsController',
+        ]);
+    }
+
+
+
 }
