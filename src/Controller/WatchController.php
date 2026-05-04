@@ -20,10 +20,10 @@ final class WatchController extends AbstractController
 
         $comment = new Comments();
 
-        $Commentform = $this->createForm(CommentType::class, $comment /*, [
-            'action' => $this->generateUrl('comment_add', ['uuid' => $uuid]),
+        $Commentform = $this->createForm(CommentType::class, $comment , [
+            'action' => $this->generateUrl('comment_upload', ['uuid' => $uuid]),
             'method' => 'POST',
-        ]*/);
+        ]);
 
         $segments = explode('/', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'));
 
