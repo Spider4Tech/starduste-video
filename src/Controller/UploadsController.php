@@ -174,6 +174,8 @@ final class UploadsController extends AbstractController
     {
 
         $data = json_decode($request->getContent(), true);
+        $user = $this->getUser();
+
 
 
         return $this->render('short_upload.html.twig', [

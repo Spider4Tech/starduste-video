@@ -70,7 +70,7 @@
                     {{ form_start(CommentForm, {attr: {id: 'Commentform'}}) }}
                     <div class="d-flex gap-3 mb-5">
                         <img src="https://ui-avatars.com/api/?name=Moi&background=333&color=fff" alt="Avatar" class="rounded-circle" width="40" height="40">
-                        <div class="flex-grow-1">
+                        <div id= "CommentInput" class="flex-grow-1" data-VideoId = {{ video.uuid}} >
                             {{ form_widget (CommentForm.commentaire, {'attr': {'class': 'comment-input'}}) }}
                            {#  <textarea class="comment-input" placeholder="Ajouter un commentaire..." rows="1"{{ form_row(CommentForm.commentaire) }}</textarea>#}
                             <div class="d-flex justify-content-end mt-2">
@@ -207,5 +207,13 @@
                 }
             });
         });
+
+
+
+
+        async function UploadComment(){
+
+
+        }
     </script>
 {% endblock %}
