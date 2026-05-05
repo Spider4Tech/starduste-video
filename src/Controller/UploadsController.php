@@ -178,6 +178,7 @@ final class UploadsController extends AbstractController
 
 
 
+
         return $this->render('short_upload.html.twig', [
             'controller_name' => 'UploadsController',
         ]);
