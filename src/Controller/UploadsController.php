@@ -2,7 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Comments;
 use App\Form\RegisterType;
+use App\Repository\CommentsRepository;
+use App\Repository\VideoRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,6 +18,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use FFMpeg\FFProbe;
 use FFMpeg\FFMpeg;
 use App\Entity\Utilisateurs;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 
 final class UploadsController extends AbstractController
@@ -170,18 +174,34 @@ final class UploadsController extends AbstractController
     }
 
     #[Route('/commentupload', name: 'comment_upload')]
-    public function comment_upload(Request $request, EntityManagerInterface $em): JsonResponse
+    public function comment_upload(Request $request, EntityManagerInterface $em, ValidatorInterface $validator, CommentsRepository $commentsRepository, VideoRepository $videoRepository): JsonResponse
     {
 
         $data = json_decode($request->getContent(), true);
-        $user = $this->getUser();
+        if ($data !== null && isset($data['uuidvideo']) && isset($data['message'])) {
+            $uuidVideo = $data['uuidvideo'];
+            $ComVideo = $videoRepository->findOneBy(['id' => $uuidVideo]);
+            if ($ComVideo === null) {
+                return new JsonResponse(['error' => 'Video not found'], 404);
+            }
+            $user = $this->getUser();
+            if (!$user instanceof Utilisateurs) {
+                return new JsonResponse(['error' => 'Invalid user type'], 401);
+            }
 
+            $Commentaire = new Comments();
+            $Commentaire->setCommentaire($data['message']);
+            $Commentaire->setComVideo($ComVideo);
+            $Commentaire->setCommentUploader($user);
+            $Commentaire->setDateComment(new \DateTime());
+            $em->persist($Commentaire);
+            $em->flush();
+            return new JsonResponse(['message' => 'upload du commentaire reussi !!']);
+        }
+        else{
 
-
-
-        return $this->render('short_upload.html.twig', [
-            'controller_name' => 'UploadsController',
-        ]);
+            return new JsonResponse(['Message' => 'problème de reception des données, peut être que les données sont vides ou malformées']);
+        }
     }
 
 

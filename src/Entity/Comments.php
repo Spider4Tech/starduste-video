@@ -26,7 +26,7 @@ class Comments
     private ?bool $favorited = null;
 
     #[ORM\ManyToOne(targetEntity: Video::class)]
-    #[ORM\JoinColumn(name: "CommentVideoId",referencedColumnName: "uuid", nullable: false)]
+    #[ORM\JoinColumn(name: "CommentVideoId",referencedColumnName: "id", nullable: false)]
     private ?Video $ComVideo = null;
 
     #[ORM\ManyToOne(targetEntity: Utilisateurs::class)]

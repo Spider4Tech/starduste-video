@@ -70,11 +70,12 @@
                     {{ form_start(CommentForm, {attr: {id: 'Commentform'}}) }}
                     <div class="d-flex gap-3 mb-5">
                         <img src="https://ui-avatars.com/api/?name=Moi&background=333&color=fff" alt="Avatar" class="rounded-circle" width="40" height="40">
-                        <div id= "CommentInput" class="flex-grow-1" data-videoid = {{ video.uuid}} >
-                            {{ form_widget (CommentForm.commentaire, {'attr': {'class': 'comment-input'}}) }}
+                        <div id= "CommentInput" class="flex-grow-1" data-videoid = {{ video.id}} >
+                            {{ form_widget (CommentForm.commentaire, {'attr': {'class': 'comment-input', 'id': 'actualcommentarea'}}) }}
+                            {{ form_end(CommentForm) }}
                            {#  <textarea class="comment-input" placeholder="Ajouter un commentaire..." rows="1"{{ form_row(CommentForm.commentaire) }}</textarea>#}
                             <div class="d-flex justify-content-end mt-2">
-                                <button class="btn-comment">Commenter</button>
+                                <button type = "button"class="btn-comment" id = "btn-comment">Commenter</button>
                             </div>
                         </div>
                     </div>
@@ -206,31 +207,33 @@
                     ]
                 }
             });
+
+            // Add event listener for comment upload
+            document.getElementById('btn-comment').addEventListener('click', async function() {
+                const idvideo = document.getElementById('CommentInput').dataset.videoid;
+                const dataToSend = {
+                    message: document.getElementById('comment_commentaire').value,
+                    uuidvideo: idvideo
+                };
+                try {
+                    const response = await fetch("/commentupload", {
+                        method: 'POST',
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(dataToSend)
+                    });
+                    const data = await response.json();
+                    console.log(data);
+                    if (response.ok) {
+                        // Optionally, clear the input or refresh comments
+                        document.getElementById('comment_commentaire').value = '';
+                        // You might want to reload the page or append the new comment
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('Error uploading comment:', error);
+                }
+            });
         });
-
-
-
-
-        async function UploadComment(){
-            const champCom = document.getElementById("CommentInput")
-            const idvideo = champCom.dataset.videoid
-            const dataToSend = {Message: document.getElementById('CommentInput').value,
-                                uuidVideo: idvideo}
-            const response = await fetch("/commentupload", {
-
-                method: 'POST',
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(dataToSend)
-            })
-            const data = await response.json();
-            console.log(data)
-
-
-
-
-        }
-
-
-
     </script>
 {% endblock %}
