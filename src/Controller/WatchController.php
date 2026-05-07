@@ -27,7 +27,7 @@ final class WatchController extends AbstractController
 
         $segments = explode('/', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'));
 
-        $comments = $commentsRepository->findBy(['ComVideo' => $uuid]);
+        $comments = $commentsRepository->findBy(['ComVideo' => $video->getId()]);
         $commentsData = [];
         foreach ($comments as $comment){
             $commentsData[] = [
