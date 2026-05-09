@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : localhost
--- Généré le : sam. 25 avr. 2026 à 00:51
+-- Généré le : sam. 09 mai 2026 à 00:52
 -- Version du serveur : 10.11.16-MariaDB
 -- Version de PHP : 8.4.20
 
@@ -33,17 +33,19 @@ CREATE TABLE `comments` (
                             `comlike` int(11) NOT NULL,
                             `comdislike` int(11) NOT NULL,
                             `favorited` tinyint(4) DEFAULT NULL,
-                            `CommentVideoId` varchar(32) NOT NULL,
                             `date_comment` datetime NOT NULL,
-                            `CommentUploaderId` int(11) NOT NULL
+                            `CommentUploaderId` int(11) NOT NULL,
+                            `CommentVideoId` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Déchargement des données de la table `comments`
 --
 
-INSERT INTO `comments` (`id`, `commentaire`, `comlike`, `comdislike`, `favorited`, `CommentVideoId`, `date_comment`, `CommentUploaderId`) VALUES
-    (1, 'trés bonne vidéo d\'un joueur roblox qui tourne sur lui même je trouve qu\'elle es tassez reussite ^^', 0, 0, NULL, '37d856aa4a1f564c73f4112269f5ce39', '2026-04-25 00:18:51', 4);
+INSERT INTO `comments` (`id`, `commentaire`, `comlike`, `comdislike`, `favorited`, `date_comment`, `CommentUploaderId`, `CommentVideoId`) VALUES
+                                                                                                                                              (2, 'test', 0, 0, NULL, '2026-05-07 07:48:05', 4, 2),
+                                                                                                                                              (3, 'test', 0, 0, NULL, '2026-05-07 09:56:55', 4, 2),
+                                                                                                                                              (4, 'tres bonne vidéo ^', 0, 0, NULL, '2026-05-07 09:57:18', 4, 2);
 
 -- --------------------------------------------------------
 
@@ -153,8 +155,8 @@ INSERT INTO `video` (`id`, `like_vid`, `title`, `video_duration`, `video_url`, `
 --
 ALTER TABLE `comments`
     ADD PRIMARY KEY (`id`),
-  ADD KEY `IDX_5F9E962A44739184` (`CommentVideoId`),
-  ADD KEY `IDX_5F9E962AA31CFA96` (`CommentUploaderId`);
+  ADD KEY `IDX_5F9E962AA31CFA96` (`CommentUploaderId`),
+  ADD KEY `IDX_5F9E962A44739184` (`CommentVideoId`);
 
 --
 -- Index pour la table `doctrine_migration_versions`
@@ -193,7 +195,7 @@ ALTER TABLE `video`
 -- AUTO_INCREMENT pour la table `comments`
 --
 ALTER TABLE `comments`
-    MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+    MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT pour la table `messenger_messages`
@@ -221,7 +223,7 @@ ALTER TABLE `video`
 -- Contraintes pour la table `comments`
 --
 ALTER TABLE `comments`
-    ADD CONSTRAINT `FK_5F9E962A44739184` FOREIGN KEY (`CommentVideoId`) REFERENCES `video` (`uuid`),
+    ADD CONSTRAINT `FK_5F9E962A44739184` FOREIGN KEY (`CommentVideoId`) REFERENCES `video` (`id`),
   ADD CONSTRAINT `FK_5F9E962AA31CFA96` FOREIGN KEY (`CommentUploaderId`) REFERENCES `Utilisateurs` (`id`);
 
 --
