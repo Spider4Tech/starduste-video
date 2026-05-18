@@ -24,15 +24,17 @@
                         {# --- BARRE D'INFOS & ACTIONS --- #}
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mt-3">
                             <div class="text-white-50">
-                                <i class="bi bi-eye-fill me-2"></i> {{ video.views}} vues • {{ "now"|date("d M. Y") }}
+                                <i class="bi bi-eye-fill me-2"></i> {{ video.views }} vues • {{ "now"|date("d M. Y") }}
                             </div>
 
                             <div class="d-flex gap-2">
-                                <button class="btn-action">
-                                    <i class="bi bi-hand-thumbs-up-fill"></i> <span>{{ video.likevid }}</span>
+                                <button class="btn-action btn-like-video {# userLiked ? 'active' : '' #}" id="btnlikevideo" data-videoid="{{ video.id }}">
+                                    <i class="bi bi-hand-thumbs-up-fill"></i>
+                                    <span id="like-count">{{ video.likevid }}</span>
                                 </button>
-                                <button class="btn-action">
-                                    <i class="bi bi-hand-thumbs-down"></i> <span>{{ video.dislikevid }}</span>
+                                <button class="btn-action btn-dislike-video {# userDisliked ? 'active' : '' #}" id="btn-dislike-video" data-videoid="{{ video.id }}">
+                                    <i class="bi bi-hand-thumbs-down-fill"></i>
+                                    <span id="dislike-count">{{ video.dislikevid }}</span>
                                 </button>
                                 <button class="btn-action">
                                     <i class="bi bi-share"></i> Partager
@@ -47,9 +49,9 @@
                             <div class="d-flex align-items-center">
                                 <div class="profile-placeholder me-3">
                                     {% if video.getUploader.pfppath %}
-                                    <img src="{{ asset(video.uploader.Pfppath) }}" alt="Avatar" class="rounded-circle" width="48">
+                                        <img src="{{ asset(video.uploader.Pfppath) }}" alt="Avatar" class="rounded-circle" width="48">
                                     {% else %}
-                                    <img src="{{ asset('uploads/fallbacksElement/FallbackPFP.png') }}" alt="Avatar" class="rounded-circle" width="48">
+                                        <img src="{{ asset('uploads/fallbacksElement/FallbackPFP.png') }}" alt="Avatar" class="rounded-circle" width="48">
                                     {% endif %}
                                 </div>
                                 <div>
@@ -70,30 +72,36 @@
                     {{ form_start(CommentForm, {attr: {id: 'Commentform'}}) }}
                     <div class="d-flex gap-3 mb-5">
                         <img src="https://ui-avatars.com/api/?name=Moi&background=333&color=fff" alt="Avatar" class="rounded-circle" width="40" height="40">
-                        <div id= "CommentInput" class="flex-grow-1" data-videoid = {{ video.id}} >
-                            {{ form_widget (CommentForm.commentaire, {'attr': {'class': 'comment-input', 'id': 'actualcommentarea'}}) }}
+                        <div id="CommentInput" class="flex-grow-1" data-videoid={{ video.id }}>
+                            {{ form_widget(CommentForm.commentaire, {'attr': {'class': 'comment-input', 'id': 'actualcommentarea'}}) }}
                             {{ form_end(CommentForm) }}
-                           {#  <textarea class="comment-input" placeholder="Ajouter un commentaire..." rows="1"{{ form_row(CommentForm.commentaire) }}</textarea>#}
                             <div class="d-flex justify-content-end mt-2">
-                                <button type = "button"class="btn-comment" id = "btn-comment">Commenter</button>
+                                <button type="button" class="btn-comment" id="btn-comment">Commenter</button>
                             </div>
                         </div>
                     </div>
 
-                    {# Liste des commentaires (Exemple statique) #}
+                    {# Liste des commentaires #}
                     <div class="comment-list">
                         {% for Commentaire in Commentaires %}
-                            <div class="d-flex gap-3 mb-4">
+                            <div class="d-flex gap-3 mb-4 comment-item" data-commentid="{{ Commentaire.id }}">
                                 <img src="{{ Commentaire.uploaderpfp }}" alt="Avatar" class="rounded-circle" width="40" height="40">
-                                <div>
+                                <div class="flex-grow-1">
                                     <div class="d-flex align-items-center gap-2 mb-1">
                                         <span class="fw-bold small">{{ Commentaire.uploaderUsername }}</span>
                                         <span class="text-white-50" style="font-size: 0.75rem;">il y a 2h</span>
                                     </div>
                                     <p class="mb-2" style="font-size: 0.95rem; opacity: 0.9;">{{ Commentaire.ComText }}</p>
                                     <div class="d-flex align-items-center gap-3 text-white-50 small">
-                                        <span class="cursor-pointer"><i class="bi bi-hand-thumbs-up"></i> 12</span>
-                                        <span class="cursor-pointer">Répondre</span>
+                                        <button class="btn-comment-action btn-like-comment" data-commentid="{{ Commentaire.id }}">
+                                            <i class="bi bi-hand-thumbs-up"></i>
+                                            <span class="like-count">12</span>
+                                        </button>
+                                        <button class="btn-comment-action btn-dislike-comment" data-commentid="{{ Commentaire.id }}">
+                                            <i class="bi bi-hand-thumbs-down"></i>
+                                            <span class="dislike-count">0</span>
+                                        </button>
+                                        <span class="cursor-pointer" style="opacity: 0.6; transition: 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6">Répondre</span>
                                     </div>
                                 </div>
                             </div>
@@ -127,11 +135,48 @@
             padding: 6px 15px;
             border-radius: 30px;
             font-size: 0.9rem;
-            transition: 0.3s;
+            transition: background 0.25s, border-color 0.25s, color 0.25s, transform 0.15s;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
         }
         .btn-action:hover {
             background: rgba(108, 92, 231, 0.2);
             border-color: var(--accent-purple);
+        }
+
+        /* État actif like — spécificité renforcée + !important pour écraser Bootstrap */
+        .btn-action.btn-like-video.active,
+        .btn-action.btn-like-video.active:hover {
+            background: rgba(108, 92, 231, 0.25) !important;
+            border-color: #a29bfe !important;
+            color: #a29bfe !important;
+        }
+        .btn-action.btn-like-video.active i {
+            filter: drop-shadow(0 0 6px #a29bfe);
+        }
+
+        /* État actif dislike — spécificité renforcée + !important pour écraser Bootstrap */
+        .btn-action.btn-dislike-video.active,
+        .btn-action.btn-dislike-video.active:hover {
+            background: rgba(108, 92, 231, 0.12) !important;
+            border-color: #6c5ce7 !important;
+            color: #6c5ce7 !important;
+        }
+        .btn-action.btn-dislike-video.active i {
+            filter: drop-shadow(0 0 6px #6c5ce7);
+        }
+
+        /* Animation pop au clic */
+        @keyframes pop {
+            0%   { transform: scale(1); }
+            40%  { transform: scale(1.25); }
+            100% { transform: scale(1); }
+        }
+        .btn-like-video.pop,
+        .btn-dislike-video.pop {
+            animation: pop 0.25s ease-out;
         }
 
         /* Bouton s'abonner */
@@ -183,6 +228,33 @@
             padding: 10px;
         }
 
+        /* Boutons like/dislike des commentaires */
+        .btn-comment-action {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.45);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+        }
+        .btn-comment-action:hover {
+            background: rgba(255, 255, 255, 0.07);
+            color: white;
+        }
+        .btn-like-comment.active {
+            color: #a29bfe;
+            background: rgba(108, 92, 231, 0.15);
+        }
+        .btn-dislike-comment.active {
+            color: #fd79a8;
+            background: rgba(253, 121, 168, 0.1);
+        }
+
         .cursor-pointer { cursor: pointer; }
     </style>
 {% endblock %}
@@ -190,6 +262,51 @@
 {% block javascripts %}
     {{ parent() }}
     <script>
+        document.addEventListener("DOMContentLoaded", async function(){
+            const idvideo = document.getElementById('btnlikevideo').dataset.videoid;
+            const btnLike = document.getElementById("btnlikevideo")
+            const btnDislike = document.getElementById("btn-dislike-video")
+            const datatosend = {
+                idvideo: idvideo
+            }
+
+            try {
+                const response = await fetch('/checklike', {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(datatosend)
+                })
+                const data = await response.json();
+                console.log(data);
+                if (response.ok){
+                    if (data.action === "Liked") {
+                        btnLike.classList.add('active');
+                        console.log('actif donné aux likes')
+
+
+
+                    }
+                    if (data.action === "Disliked"){
+                        btnDislike.classList.add('active');
+                        console.log('actif donné aux dislikes')
+
+                    }
+
+                    if (data.action === "nope"){
+                        console.log("pas d'actifs donné")
+                        return
+                    }
+
+                }
+            } catch (error){
+                console.error('ya un probleme la surement au niveau du controller', error)
+                console.log("probleme ici je pense")
+
+            }
+        })
+
+
+
         document.addEventListener('DOMContentLoaded', function() {
             var player = videojs('starduste-player', {
                 playbackRates: [0.5, 1, 1.5, 2],
@@ -207,8 +324,9 @@
                     ]
                 }
             });
+        });
 
-            // Add event listener for comment upload
+            // --- Commentaires ---
             document.getElementById('btn-comment').addEventListener('click', async function() {
                 const idvideo = document.getElementById('CommentInput').dataset.videoid;
                 const dataToSend = {
@@ -224,9 +342,7 @@
                     const data = await response.json();
                     console.log(data);
                     if (response.ok) {
-                        // Optionally, clear the input or refresh comments
                         document.getElementById('comment_commentaire').value = '';
-                        // You might want to reload the page or append the new comment
                     } else {
                         alert('Error: ' + data.error);
                     }
@@ -234,6 +350,106 @@
                     console.error('Error uploading comment:', error);
                 }
             });
-        });
+
+            function triggerPop(btn) {
+                btn.classList.remove('pop');
+                void btn.offsetWidth;  // force le navigateur à "oublier" l'animation pour pouvoir la rejouer
+                btn.classList.add('pop');
+                btn.addEventListener('animationend', () => btn.classList.remove('pop'), { once: true });
+            }
+
+
+            // --like et dislike--
+
+            const btnLike = document.getElementById("btnlikevideo")
+            const btnDislike = document.getElementById("btn-dislike-video")
+            let nombrelike = document.getElementById("like-count")
+            let nombredislike = document.getElementById(("dislike-count"))
+            btnLike.addEventListener('click', async function(){
+                const idVideo = btnLike.dataset.videoid
+                const jsonBody = {
+                        idVideo: idVideo};
+                try {
+                    const response = await fetch("/addvideolike", {
+                        method:'POST',
+                        headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify(jsonBody)
+
+                    })
+                    const data = await response.json();
+                    console.log(data)
+                    if(response.ok){
+                        if (data.action === "Liked"){
+                            this.classList.add('active');
+                            triggerPop(this)
+                            if (btnDislike.classList.contains('active') ){
+                                btnDislike.classList.remove('active')
+                                nombredislike.textContent = parseInt(nombredislike.textContent) - 1;
+
+                            }
+                            nombrelike.textContent = parseInt(nombrelike.textContent) + 1;
+
+
+
+                        }else if (data.action === "unliked"){
+                            this.classList.remove('active')
+                            triggerPop(this);
+                            nombrelike.textContent = parseInt(nombrelike.textContent) - 1;
+                        }
+                    }
+                } catch (error){
+                    console.error(error);
+                }
+
+
+
+
+
+
+
+            })
+
+            btnDislike.addEventListener('click', async function(){
+                const idVideo = btnLike.dataset.videoid
+                const jsonBody = {
+                    idVideo: idVideo};
+                try {
+                    const response = await fetch("/addvideodislike", {
+                        method:'POST',
+                        headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify(jsonBody)
+
+                    })
+                    const data = await response.json();
+                    console.log(data)
+                    if(response.ok){
+                        if (data.action === "Disliked"){
+                            this.classList.add('active');
+                            if (btnLike.classList.contains('active')){//ne fera rien si ce n'est pas le cas
+                                btnLike.classList.remove('active')
+                                nombrelike.textContent = parseInt(nombrelike.textContent) - 1;
+
+                            }
+                            triggerPop(this)
+                            nombredislike.textContent = parseInt(nombredislike.textContent) + 1;
+
+
+
+                        }else if (data.action === "undisliked"){
+                            this.classList.remove('active')
+                            triggerPop(this);
+                            nombredislike.textContent = parseInt(nombredislike.textContent) - 1;
+                            //TODO faire en sorte que lorsqu'on dislike et on like ça enlève le like/dislike si il y'en avait un avant
+                            //à mon avis pour ça faudra jouer un peu avec le controller genre par exemple qu'il regarde dans la table et qu'il te donne si oui ou non ton nom apparait dans la table
+                            //ça sera plus simple je pense
+                        }
+                    }
+                } catch (error){
+                    console.error(error);
+                }})
+
+
+
+
     </script>
 {% endblock %}
