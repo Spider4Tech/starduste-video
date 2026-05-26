@@ -26,6 +26,22 @@ class Opinion
     #[ORM\Column]
     private ?\DateTime $created_at = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?String $type = null;
+
+    #[ORM\ManyToOne(inversedBy: 'opinions')]
+    private ?Comments $Commentid = null;
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(?string $type): void
+    {
+        $this->type = $type;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -75,6 +91,18 @@ class Opinion
     public function setCreatedAt(\DateTime $created_at): static
     {
         $this->created_at = $created_at;
+
+        return $this;
+    }
+
+    public function getCommentid(): ?Comments
+    {
+        return $this->Commentid;
+    }
+
+    public function setCommentid(?Comments $Commentid): static
+    {
+        $this->Commentid = $Commentid;
 
         return $this;
     }

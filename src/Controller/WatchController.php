@@ -45,6 +45,8 @@ final class WatchController extends AbstractController
 
             ];
         }
+        $video->setViews($video->getViews()+1);
+
 
         return $this->render('watch/watch.html.twig', [
             'video' => $video,

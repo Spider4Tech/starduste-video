@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : localhost
--- Généré le : lun. 18 mai 2026 à 21:41
+-- Généré le : mar. 26 mai 2026 à 02:53
 -- Version du serveur : 11.8.6-MariaDB
 -- Version de PHP : 8.5.6
 
@@ -44,7 +44,9 @@ CREATE TABLE `comments` (
 
 INSERT INTO `comments` (`id`, `commentaire`, `comlike`, `comdislike`, `favorited`, `CommentVideoId`, `date_comment`, `CommentUploaderId`) VALUES
                                                                                                                                               (1, 'trés bonne vidéo d\'un joueur roblox qui tourne sur lui même je trouve qu\'elle es tassez reussite ^^', 0, 0, NULL, 2, '2026-04-25 00:18:51', 4),
-                                                                                                                                              (2, 'ça tourne et moi j\'aime bien :D', 0, 0, NULL, 2, '2026-05-09 23:44:00', 4);
+                                                                                                                                              (2, 'ça tourne et moi j\'aime bien :D', 0, 0, NULL, 2, '2026-05-09 23:44:00', 4),
+(3, 'he\'s so bad lol x\'D', 0, 0, NULL, 3, '2026-05-25 00:36:15', 4),
+(4, 'lol', 0, 1, NULL, 5, '2026-05-25 21:55:58', 4);
 
 -- --------------------------------------------------------
 
@@ -92,15 +94,17 @@ CREATE TABLE `opinion` (
   `value` varchar(25) NOT NULL,
   `created_at` datetime NOT NULL,
   `user_id_id` int(11) DEFAULT NULL,
-  `video_id_id` int(11) DEFAULT NULL
+  `video_id_id` int(11) DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `commentid_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
 --
 -- Déchargement des données de la table `opinion`
 --
 
-INSERT INTO `opinion` (`id`, `value`, `created_at`, `user_id_id`, `video_id_id`) VALUES
-(116, 'Disliked', '2026-05-18 01:15:43', 4, 2);
+INSERT INTO `opinion` (`id`, `value`, `created_at`, `user_id_id`, `video_id_id`, `type`, `commentid_id`) VALUES
+(232, 'Disliked', '2026-05-26 02:52:01', 4, NULL, 'COMMENT', 4);
 
 -- --------------------------------------------------------
 
@@ -155,7 +159,7 @@ INSERT INTO `Utilisateurs` (`id`, `pseudo`, `subscribers`, `JOIN_DATE`, `uploade
 CREATE TABLE `video` (
   `id` int(11) NOT NULL,
   `like_vid` int(11) NOT NULL,
-  `title` varchar(28) NOT NULL,
+  `title` varchar(128) NOT NULL,
   `video_duration` int(11) NOT NULL,
   `video_url` varchar(255) DEFAULT NULL,
   `thumbnail` varchar(255) DEFAULT NULL,
@@ -176,7 +180,10 @@ CREATE TABLE `video` (
 
 INSERT INTO `video` (`id`, `like_vid`, `title`, `video_duration`, `video_url`, `thumbnail`, `upload_date`, `dislike_vid`, `description`, `status`, `categorie`, `uuid`, `is_short`, `views`, `uploader_id`) VALUES
 (1, 0, 'spinning noob ahaha', 6, 'uploads/shorts/5f9df9e115cb89c96992e62967f7ed4f/5f9df9e115cb89c96992e62967f7ed4f.mp4', 'uploads/fallbacksElement/FallbackThumbnail.webp', '2026-03-23 18:20:26', 0, 'spinning noob lol', 1, 'humour', '5f9df9e115cb89c96992e62967f7ed4f', 1, 0, 4),
-(2, 0, 'spinning robloxian ah ah', 28, 'uploads/videos/37d856aa4a1f564c73f4112269f5ce39/37d856aa4a1f564c73f4112269f5ce39.mp4', 'uploads/videos/37d856aa4a1f564c73f4112269f5ce39/Thumbnail37d856aa4a1f564c73f4112269f5ce39.jpg', '2026-03-24 09:19:58', 1, 'its a spiinning robloxian :P', 1, 'humour', '37d856aa4a1f564c73f4112269f5ce39', 0, 0, 4);
+(2, 0, 'spinning robloxian ah ah', 28, 'uploads/videos/37d856aa4a1f564c73f4112269f5ce39/37d856aa4a1f564c73f4112269f5ce39.mp4', 'uploads/videos/37d856aa4a1f564c73f4112269f5ce39/Thumbnail37d856aa4a1f564c73f4112269f5ce39.jpg', '2026-03-24 09:19:58', 1, 'its a spiinning robloxian :P', 1, 'humour', '37d856aa4a1f564c73f4112269f5ce39', 0, 0, 4),
+(3, 1, 'fortnite player break his keyboard because he\'s bad', 21, 'uploads/videos/ec751cb8799d4d5eaef987ea35effc5d/ec751cb8799d4d5eaef987ea35effc5d.mp4', 'uploads/fallbacksElement/FallbackThumbnail.webp', '2026-05-24 17:32:24', 0, 'lol', 1, 'humour', 'ec751cb8799d4d5eaef987ea35effc5d', 0, 0, 4),
+                                                                                                                                              (4, 0, 'test meme', 15, 'uploads/shorts/0cb09eb4566cda063a060b87463da746/0cb09eb4566cda063a060b87463da746.mp4', 'uploads/fallbacksElement/FallbackThumbnail.webp', '2026-05-25 01:24:16', 0, 'test', 1, 'humour', '0cb09eb4566cda063a060b87463da746', 1, 0, 4),
+                                                                                                                                              (5, 0, 'test meme', 12, 'uploads/videos/9affb6eb4f7986e7d00a36fb17f81495/9affb6eb4f7986e7d00a36fb17f81495.mp4', 'uploads/fallbacksElement/FallbackThumbnail.webp', '2026-05-25 01:24:29', 0, 'test', 1, 'humour', '9affb6eb4f7986e7d00a36fb17f81495', 0, 0, 4);
 
 --
 -- Index pour les tables déchargées
@@ -186,7 +193,7 @@ INSERT INTO `video` (`id`, `like_vid`, `title`, `video_duration`, `video_url`, `
 -- Index pour la table `comments`
 --
 ALTER TABLE `comments`
-  ADD PRIMARY KEY (`id`),
+    ADD PRIMARY KEY (`id`),
   ADD KEY `IDX_5F9E962A44739184` (`CommentVideoId`),
   ADD KEY `IDX_5F9E962AA31CFA96` (`CommentUploaderId`);
 
@@ -194,28 +201,29 @@ ALTER TABLE `comments`
 -- Index pour la table `doctrine_migration_versions`
 --
 ALTER TABLE `doctrine_migration_versions`
-  ADD PRIMARY KEY (`version`);
+    ADD PRIMARY KEY (`version`);
 
 --
 -- Index pour la table `messenger_messages`
 --
 ALTER TABLE `messenger_messages`
-  ADD PRIMARY KEY (`id`),
+    ADD PRIMARY KEY (`id`),
   ADD KEY `IDX_75EA56E0FB7336F0E3BD61CE16BA31DBBF396750` (`queue_name`,`available_at`,`delivered_at`,`id`);
 
 --
 -- Index pour la table `opinion`
 --
 ALTER TABLE `opinion`
-  ADD PRIMARY KEY (`id`),
+    ADD PRIMARY KEY (`id`),
   ADD KEY `IDX_AB02B0279D86650F` (`user_id_id`),
-  ADD KEY `IDX_AB02B027F02697F5` (`video_id_id`);
+  ADD KEY `IDX_AB02B027F02697F5` (`video_id_id`),
+  ADD KEY `IDX_AB02B0274574CA0` (`commentid_id`);
 
 --
 -- Index pour la table `subscribe`
 --
 ALTER TABLE `subscribe`
-  ADD PRIMARY KEY (`id`),
+    ADD PRIMARY KEY (`id`),
   ADD KEY `IDX_68B95F3EF9B6176` (`subscribed_to_id`),
   ADD KEY `IDX_68B95F3E4F6E6AC1` (`subscribers_id`);
 
@@ -223,7 +231,7 @@ ALTER TABLE `subscribe`
 -- Index pour la table `Utilisateurs`
 --
 ALTER TABLE `Utilisateurs`
-  ADD PRIMARY KEY (`id`),
+    ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `UNIQ_514AEAA610C6BEC4` (`email`),
   ADD UNIQUE KEY `UNIQ_514AEAA6D17F50A6` (`uuid`);
 
@@ -231,7 +239,7 @@ ALTER TABLE `Utilisateurs`
 -- Index pour la table `video`
 --
 ALTER TABLE `video`
-  ADD PRIMARY KEY (`id`),
+    ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `UNIQ_7CC7DA2CD17F50A6` (`uuid`),
   ADD KEY `IDX_7CC7DA2C16678C77` (`uploader_id`);
 
@@ -243,37 +251,37 @@ ALTER TABLE `video`
 -- AUTO_INCREMENT pour la table `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+    MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT pour la table `messenger_messages`
 --
 ALTER TABLE `messenger_messages`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+    MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `opinion`
 --
 ALTER TABLE `opinion`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=117;
+    MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=233;
 
 --
 -- AUTO_INCREMENT pour la table `subscribe`
 --
 ALTER TABLE `subscribe`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+    MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `Utilisateurs`
 --
 ALTER TABLE `Utilisateurs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+    MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT pour la table `video`
 --
 ALTER TABLE `video`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+    MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Contraintes pour les tables déchargées
@@ -283,13 +291,14 @@ ALTER TABLE `video`
 -- Contraintes pour la table `comments`
 --
 ALTER TABLE `comments`
-  ADD CONSTRAINT `FK_5F9E962A44739184` FOREIGN KEY (`CommentVideoId`) REFERENCES `video` (`id`),
+    ADD CONSTRAINT `FK_5F9E962A44739184` FOREIGN KEY (`CommentVideoId`) REFERENCES `video` (`id`),
   ADD CONSTRAINT `FK_5F9E962AA31CFA96` FOREIGN KEY (`CommentUploaderId`) REFERENCES `Utilisateurs` (`id`);
 
 --
 -- Contraintes pour la table `opinion`
 --
 ALTER TABLE `opinion`
+    ADD CONSTRAINT `FK_AB02B0274574CA0` FOREIGN KEY (`commentid_id`) REFERENCES `comments` (`id`),
   ADD CONSTRAINT `FK_AB02B0279D86650F` FOREIGN KEY (`user_id_id`) REFERENCES `Utilisateurs` (`id`),
   ADD CONSTRAINT `FK_AB02B027F02697F5` FOREIGN KEY (`video_id_id`) REFERENCES `video` (`id`);
 
@@ -297,14 +306,14 @@ ALTER TABLE `opinion`
 -- Contraintes pour la table `subscribe`
 --
 ALTER TABLE `subscribe`
-  ADD CONSTRAINT `FK_68B95F3E4F6E6AC1` FOREIGN KEY (`subscribers_id`) REFERENCES `Utilisateurs` (`id`),
+    ADD CONSTRAINT `FK_68B95F3E4F6E6AC1` FOREIGN KEY (`subscribers_id`) REFERENCES `Utilisateurs` (`id`),
   ADD CONSTRAINT `FK_68B95F3EF9B6176` FOREIGN KEY (`subscribed_to_id`) REFERENCES `Utilisateurs` (`id`);
 
 --
 -- Contraintes pour la table `video`
 --
 ALTER TABLE `video`
-  ADD CONSTRAINT `FK_7CC7DA2C16678C77` FOREIGN KEY (`uploader_id`) REFERENCES `Utilisateurs` (`id`);
+    ADD CONSTRAINT `FK_7CC7DA2C16678C77` FOREIGN KEY (`uploader_id`) REFERENCES `Utilisateurs` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

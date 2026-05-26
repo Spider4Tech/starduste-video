@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CommentsRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CommentsRepository::class)]
@@ -35,6 +37,17 @@ class Comments
 
     #[ORM\Column]
     private ?\DateTime $Date_Comment = null;
+
+    /**
+     * @var Collection<int, Opinion>
+     */
+    #[ORM\OneToMany(targetEntity: Opinion::class, mappedBy: 'Commentid', cascade: ['remove'])]
+    private Collection $opinions;
+
+    public function __construct()
+    {
+        $this->opinions = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -122,6 +135,36 @@ class Comments
     public function setDateComment(\DateTime $Date_Comment): static
     {
         $this->Date_Comment = $Date_Comment;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Opinion>
+     */
+    public function getOpinions(): Collection
+    {
+        return $this->opinions;
+    }
+
+    public function addOpinion(Opinion $opinion): static
+    {
+        if (!$this->opinions->contains($opinion)) {
+            $this->opinions->add($opinion);
+            $opinion->setCommentid($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOpinion(Opinion $opinion): static
+    {
+        if ($this->opinions->removeElement($opinion)) {
+            // set the owning side to null (unless already changed)
+            if ($opinion->getCommentid() === $this) {
+                $opinion->setCommentid(null);
+            }
+        }
 
         return $this;
     }

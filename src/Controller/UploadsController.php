@@ -131,7 +131,7 @@ final class UploadsController extends AbstractController
                     $video->setUploader($user);
                     $em->persist($video);
                     $em->flush();
-                    return new JsonResponse(['message' => 'upload Video reussi']);
+                    return $this->redirectToRoute('app_index');
                 }
 
 

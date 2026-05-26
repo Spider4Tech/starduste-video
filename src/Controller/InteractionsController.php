@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Opinion;
+use App\Repository\CommentsRepository;
 use App\Repository\OpinionRepository;
 use App\Repository\VideoRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -43,6 +44,7 @@ final class InteractionsController extends AbstractController
             $Opinion->setCreatedAt(new \DateTime());
             $Opinion->setVideoId($Video);
             $Opinion->setValue("Liked");
+            $Opinion->setType("VIDEO");
             $Video->setLikeVid($Video->getLikeVid() + 1);
             if ($like and $like->getValue() == 'Disliked') {
 
@@ -92,6 +94,7 @@ final class InteractionsController extends AbstractController
             $Opinion->setCreatedAt(new \DateTime());
             $Opinion->setVideoId($Video);
             $Opinion->setValue("Disliked");
+            $Opinion->setType("VIDEO");
             $Video->setDislikeVid($Video->getDislikeVid() +1);
             if ($dislike and $dislike->getValue() == 'Liked') {
                 $em->remove($dislike);
@@ -130,5 +133,103 @@ final class InteractionsController extends AbstractController
 
         return new JsonResponse(['error' => 'problème avec la requête à la base']);
 
+    }
+
+
+#[Route('/addcommentarylike', name: 'commentarylike')]
+public function commentarylike(EntityManagerInterface $em, OpinionRepository $opinionRepository, Request $request, CommentsRepository $commentsRepository, VideoRepository $videoRepository):JsonResponse{
+        $data = json_decode($request->getContent(), true);
+        if ($data == null) {
+             return new JsonResponse(["error" => "apparement data a l'air null"]);
+        }
+        $uuidVideo = $data['idVideo'];
+        $idcommentaire = $data['idcommentaire'];
+
+        $Video = $videoRepository->findOneBy(['id' => $uuidVideo]);
+        $commentaire = $commentsRepository->findOneBy(['id' => $idcommentaire]);
+        $like = $opinionRepository->findOneBy(['video_id' => $uuidVideo, 'type' => "COMMENT",'Commentid' => $commentaire ]);
+        $user = $this->getUser();
+
+    if ($like != null and $like->getValue() == 'Liked')
+    {
+        $em->remove($like);
+        $commentaire->setComlike($commentaire->getComlike()-1);
+        $em->flush();
+
+        return new JsonResponse(['action' => 'unliked', 'nombrelike' => $commentaire->getComlike()]);
+    }
+
+        elseif($like == null or $like->getValue() == 'Disliked') {
+            $Opinion = new Opinion();
+            $Opinion->setUserId($user);
+            $Opinion->setCreatedAt(new \DateTime());
+            $Opinion->setVideoId($Video);
+            $Opinion->setValue("Liked");
+            $Opinion->setType("COMMENT");
+            $Opinion->setCommentid($commentaire);
+            $commentaire->setComlike($commentaire->getComlike()+1);
+            if ($like and $like->getValue() == 'Disliked') {
+
+                $em->remove($like);
+                $commentaire->setComdislike($commentaire->getComdislike()-1);
+                $em->flush();
+            }
+            $em->persist($Opinion);
+            $em->flush();
+            return new JsonResponse(['action' => 'Liked', 'nombrelike' => $commentaire->getComlike(), 'nombredislike' => $commentaire->getComdislike()]);
+        }
+
+
+
+    return new JsonResponse(['error' => 'une erreur est survenue lors de l\'ajout du like du commentaire']);
+
+        //TODO faire l'api pour les likes de commentaires (donc même principe qu'avec les vidéos mais cette fois avec les coms du coup type = COM au lieux de VIDEO
+}
+
+    #[Route('/addcommentarydislike', name: 'commentarydislike')]
+    public function commentarydislike(EntityManagerInterface $em, OpinionRepository $opinionRepository, Request $request, CommentsRepository $commentsRepository, VideoRepository $videoRepository): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        if ($data == null) {
+            return new JsonResponse(['error' => 'data null']);
+        }
+
+        $idcommentaire = $data['idcommentaire'];
+        $commentaire = $commentsRepository->findOneBy(['id' => $idcommentaire]);
+        $user = $this->getUser();
+
+        $dislike = $opinionRepository->findOneBy([
+            'Commentid' => $commentaire,
+            'user_id' => $user,
+            'type' => 'COMMENT'
+        ]);
+
+        if ($dislike != null && $dislike->getValue() == 'Disliked') {
+            // Annule le dislike
+            $em->remove($dislike);
+            $commentaire->setComdislike($commentaire->getComdislike()-1);
+            $em->flush();
+            return new JsonResponse(['action' => 'undisliked', 'nombredislike'=>$commentaire->getComdislike()]);
+        }
+
+        if ($dislike != null && $dislike->getValue() == 'Liked') {
+            // Change le like en dislike
+            $em->remove($dislike);
+            $commentaire->setComlike($commentaire->getComlike()-1);
+            $em->flush();
+        }
+
+        $opinion = new Opinion();
+        $opinion->setUserId($user);
+        $opinion->setCommentid($commentaire);
+        $opinion->setValue('Disliked');
+        $opinion->setType('COMMENT');
+        $opinion->setCreatedAt(new \DateTime());
+        $commentaire->setComdislike($commentaire->getComdislike()+1);
+
+        $em->persist($opinion);
+        $em->flush();
+
+        return new JsonResponse(['action' => 'Disliked', 'nombrelike' => $commentaire->getComlike(), 'nombredislike' => $commentaire->getComdislike()]);
     }
 }

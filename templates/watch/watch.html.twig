@@ -93,13 +93,13 @@
                                     </div>
                                     <p class="mb-2" style="font-size: 0.95rem; opacity: 0.9;">{{ Commentaire.ComText }}</p>
                                     <div class="d-flex align-items-center gap-3 text-white-50 small">
-                                        <button class="btn-comment-action btn-like-comment" data-commentid="{{ Commentaire.id }}">
+                                        <button class="btn-comment-action btn-like-comment" data-commentid="{{ Commentaire.id }}" id="btnlikecomment">
                                             <i class="bi bi-hand-thumbs-up"></i>
-                                            <span class="like-count">12</span>
+                                            <span class="like-count" id="likecommentcount">{{ Commentaire.Likes }}</span>
                                         </button>
-                                        <button class="btn-comment-action btn-dislike-comment" data-commentid="{{ Commentaire.id }}">
+                                        <button class="btn-comment-action btn-dislike-comment" data-commentid="{{ Commentaire.id }}" id="btndislikecomment">
                                             <i class="bi bi-hand-thumbs-down"></i>
-                                            <span class="dislike-count">0</span>
+                                            <span class="dislike-count" id="dislikecommentcount">{{ Commentaire.Dislikes }}</span>
                                         </button>
                                         <span class="cursor-pointer" style="opacity: 0.6; transition: 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6">Répondre</span>
                                     </div>
@@ -262,7 +262,51 @@
 {% block javascripts %}
     {{ parent() }}
     <script>
+
         document.addEventListener("DOMContentLoaded", async function(){
+            const idvideo = document.getElementById('btnlikevideo').dataset.videoid;
+            const btnLike = document.getElementById("btnlikevideo")
+            const btnDislike = document.getElementById("btn-dislike-video")
+            const datatosend = {
+                idvideo: idvideo
+            }
+
+            try {
+                const response = await fetch('/checklike', {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(datatosend)
+                })
+                const data = await response.json();
+                console.log(data);
+                if (response.ok){
+                    if (data.action === "Liked") {
+                        btnLike.classList.add('active');
+                        console.log('actif donné aux likes')
+
+
+
+                    }
+                    if (data.action === "Disliked"){
+                        btnDislike.classList.add('active');
+                        console.log('actif donné aux dislikes')
+
+                    }
+
+                    if (data.action === "nope"){
+                        console.log("pas d'actifs donné")
+                        return
+                    }
+
+                }
+            } catch (error){
+                console.error('ya un probleme la surement au niveau du controller', error)
+                console.log("probleme ici je pense")
+
+            }
+        })
+
+        document.addEventListener("DOMContentLoaded", async function CheckCommentsLikes(){
             const idvideo = document.getElementById('btnlikevideo').dataset.videoid;
             const btnLike = document.getElementById("btnlikevideo")
             const btnDislike = document.getElementById("btn-dislike-video")
@@ -447,6 +491,105 @@
                 } catch (error){
                     console.error(error);
                 }})
+        //like commentaires
+        const btndislikecomment = document.getElementById("btndislikecomment")
+        const btnlikecomment = document.getElementById("btnlikecomment")
+
+        btndislikecomment.addEventListener('click', async function dislikecomment(){
+            const idCommentary = document.getElementById("btnlikecomment").dataset.commentid
+            let dislikecount = document.getElementById("dislikecommentcount")
+            const idvideo = document.getElementById('btnlikevideo').dataset.videoid;
+            let likecount = document.getElementById("likecommentcount")
+            const jsonBody = {
+                idVideo: idvideo,
+                idcommentaire: idCommentary
+            };
+            try{
+                const response = await fetch("/addcommentarydislike",{
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(jsonBody)
+                })
+                const data = await response.json()
+                if(response.ok){
+                    if (data.action === "Disliked"){
+                        this.classList.add('active');
+                        if (btnlikecomment.classList.contains('active')){//ne fera rien si ce n'est pas le cas
+                            btnlikecomment.classList.remove('active')
+                            likecount.textContent = data.nombrelike;
+
+                        }
+                        triggerPop(this)
+                        dislikecount.textContent = data.nombredislike;
+
+
+
+                    }else if (data.action === "undisliked"){
+                        this.classList.remove('active')
+                        triggerPop(this);
+                        dislikecount.textContent = data.nombredislike;
+                        //TODO faire en sorte que lorsqu'on dislike et on like ça enlève le like/dislike si il y'en avait un avant
+                        //à mon avis pour ça faudra jouer un peu avec le controller genre par exemple qu'il regarde dans la table et qu'il te donne si oui ou non ton nom apparait dans la table
+                        //ça sera plus simple je pense
+                    }
+                }
+
+            } catch (error){
+            console.error(error)
+
+
+
+
+
+        }})
+
+        btnlikecomment.addEventListener('click', async function likecomment(){
+            const idCommentary = document.getElementById("btnlikecomment").dataset.commentid
+            let dislikecount = document.getElementById("dislikecommentcount")
+            const idvideo = document.getElementById('btnlikevideo').dataset.videoid;
+            let likecount = document.getElementById("likecommentcount")
+            const jsonBody = {
+                idVideo: idvideo,
+                idcommentaire: idCommentary};
+            try {
+                const response = await fetch("/addcommentarylike", {
+                    method:'POST',
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(jsonBody)
+
+                })
+                const data = await response.json();
+                console.log(data)
+                if(response.ok){
+                    if (data.action === "Liked"){
+                        this.classList.add('active');
+                        triggerPop(this)
+                        if (btndislikecomment.classList.contains('active') ){
+                            btndislikecomment.classList.remove('active')
+                            dislikecount.textContent = data.nombredislike;
+
+                        }
+                        likecount.textContent = data.nombrelike;
+
+
+
+                    }else if (data.action === "unliked"){
+                        this.classList.remove('active')
+                        triggerPop(this);
+                        likecount.textContent = data.nombrelike;
+                    }
+                }
+            } catch (error){
+                console.error(error);
+            }
+
+
+
+
+
+
+
+        })
 
 
 

@@ -45,7 +45,7 @@ class Video
     #[ORM\Column]
     private ?int $like_vid = null;
 
-    #[ORM\Column(length: 28)]
+    #[ORM\Column(length: 128)]
     private ?string $title = null;
 
     #[ORM\Column]
