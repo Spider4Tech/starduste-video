@@ -35,7 +35,7 @@ final class InteractionsController extends AbstractController
             $Video->setLikeVid($Video->getLikeVid() - 1);
             $em->flush();
 
-            return new JsonResponse(['action' => 'unliked']);
+            return new JsonResponse(['action' => 'unliked', 'nombrelike'=>$Video->getLikeVid()]);
 
         } else if ($like == null or $like->getValue() == 'Disliked') {//la en l'occurence si $like n'est pas null on va ajouter à la badd
             //l'entrée du like de la personne et puis voila :D
@@ -54,7 +54,7 @@ final class InteractionsController extends AbstractController
             }
             $em->persist($Opinion);
             $em->flush();
-            return new JsonResponse(['action' => 'Liked']);
+            return new JsonResponse(['action' => 'Liked', 'nombredislike'=> $Video->getDislikeVid(), 'nombrelike'=> $Video->getLikeVid()]);
 
 
         }
@@ -85,7 +85,7 @@ final class InteractionsController extends AbstractController
             $Video->setDislikeVid($Video->getDislikeVid() -1);
             $em->flush();
 
-            return new JsonResponse(['action' => 'undisliked']);
+            return new JsonResponse(['action' => 'undisliked', 'nombredislike' => $Video->getDislikeVid()]);
 
         } else if ($dislike == null or $dislike->getValue() == 'Liked') {//la en l'occurence si $dislike n'est pas null on va ajouter à la badd
             //l'entrée du like de la personne et puis voila :D
@@ -103,7 +103,7 @@ final class InteractionsController extends AbstractController
             }
             $em->persist($Opinion);
             $em->flush();
-            return new JsonResponse(['action' => 'Disliked']);
+            return new JsonResponse(['action' => 'Disliked', 'nombredislike'=> $Video->getDislikeVid(), 'nombrelike'=> $Video->getLikeVid()]);
 
 
         }
