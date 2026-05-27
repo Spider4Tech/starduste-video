@@ -328,6 +328,7 @@
                 data.liked.forEach(id => {
                     const btn = document.querySelector(`.btn-like-comment[data-commentid="${id}"]`);
                     if (btn) btn.classList.add('active');
+                    console.log("bouton actif donné au commentaire${data.liked[id]}")
                 });
 
                 data.disliked.forEach(id => {

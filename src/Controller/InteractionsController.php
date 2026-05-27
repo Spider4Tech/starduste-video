@@ -232,4 +232,34 @@ public function commentarylike(EntityManagerInterface $em, OpinionRepository $op
 
         return new JsonResponse(['action' => 'Disliked', 'nombrelike' => $commentaire->getComlike(), 'nombredislike' => $commentaire->getComdislike()]);
     }
+
+    #[Route('/checkcommentlikes', name: 'check_comment_likes', methods: ['POST'])]
+    public function checkCommentLikes(Request $request, OpinionRepository $opinionRepository): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $commentIds = $data['commentIds'] ?? [];
+        $user = $this->getUser();
+
+        if (!$user || empty($commentIds)) {
+            return new JsonResponse(['liked' => [], 'disliked' => []]);
+        }
+
+        $opinions = $opinionRepository->findBy([
+            'user_id' => $user,
+            'type' => 'COMMENT'
+        ]);
+
+        $liked = [];
+        $disliked = [];
+
+        foreach ($opinions as $opinion) {
+            $comId = $opinion->getCommentid()?->getId();
+            if (in_array((string)$comId, $commentIds)) {
+                if ($opinion->getValue() === 'Liked') $liked[] = $comId;
+                if ($opinion->getValue() === 'Disliked') $disliked[] = $comId;
+            }
+        }
+
+        return new JsonResponse(['liked' => $liked, 'disliked' => $disliked]);
+    }
 }
