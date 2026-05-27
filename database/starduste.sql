@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : localhost
--- Généré le : mar. 26 mai 2026 à 02:53
+-- Généré le : mer. 27 mai 2026 à 02:52
 -- Version du serveur : 11.8.6-MariaDB
 -- Version de PHP : 8.5.6
 
@@ -46,7 +46,7 @@ INSERT INTO `comments` (`id`, `commentaire`, `comlike`, `comdislike`, `favorited
                                                                                                                                               (1, 'trés bonne vidéo d\'un joueur roblox qui tourne sur lui même je trouve qu\'elle es tassez reussite ^^', 0, 0, NULL, 2, '2026-04-25 00:18:51', 4),
                                                                                                                                               (2, 'ça tourne et moi j\'aime bien :D', 0, 0, NULL, 2, '2026-05-09 23:44:00', 4),
 (3, 'he\'s so bad lol x\'D', 0, 0, NULL, 3, '2026-05-25 00:36:15', 4),
-(4, 'lol', 0, 1, NULL, 5, '2026-05-25 21:55:58', 4);
+(4, 'lol', 1, 0, NULL, 5, '2026-05-25 21:55:58', 4);
 
 -- --------------------------------------------------------
 
@@ -104,7 +104,8 @@ CREATE TABLE `opinion` (
 --
 
 INSERT INTO `opinion` (`id`, `value`, `created_at`, `user_id_id`, `video_id_id`, `type`, `commentid_id`) VALUES
-(232, 'Disliked', '2026-05-26 02:52:01', 4, NULL, 'COMMENT', 4);
+(244, 'Disliked', '2026-05-26 04:00:42', 4, 5, 'VIDEO', NULL),
+(248, 'Liked', '2026-05-27 02:52:18', 4, 5, 'COMMENT', 4);
 
 -- --------------------------------------------------------
 
@@ -183,7 +184,7 @@ INSERT INTO `video` (`id`, `like_vid`, `title`, `video_duration`, `video_url`, `
 (2, 0, 'spinning robloxian ah ah', 28, 'uploads/videos/37d856aa4a1f564c73f4112269f5ce39/37d856aa4a1f564c73f4112269f5ce39.mp4', 'uploads/videos/37d856aa4a1f564c73f4112269f5ce39/Thumbnail37d856aa4a1f564c73f4112269f5ce39.jpg', '2026-03-24 09:19:58', 1, 'its a spiinning robloxian :P', 1, 'humour', '37d856aa4a1f564c73f4112269f5ce39', 0, 0, 4),
 (3, 1, 'fortnite player break his keyboard because he\'s bad', 21, 'uploads/videos/ec751cb8799d4d5eaef987ea35effc5d/ec751cb8799d4d5eaef987ea35effc5d.mp4', 'uploads/fallbacksElement/FallbackThumbnail.webp', '2026-05-24 17:32:24', 0, 'lol', 1, 'humour', 'ec751cb8799d4d5eaef987ea35effc5d', 0, 0, 4),
                                                                                                                                               (4, 0, 'test meme', 15, 'uploads/shorts/0cb09eb4566cda063a060b87463da746/0cb09eb4566cda063a060b87463da746.mp4', 'uploads/fallbacksElement/FallbackThumbnail.webp', '2026-05-25 01:24:16', 0, 'test', 1, 'humour', '0cb09eb4566cda063a060b87463da746', 1, 0, 4),
-                                                                                                                                              (5, 0, 'test meme', 12, 'uploads/videos/9affb6eb4f7986e7d00a36fb17f81495/9affb6eb4f7986e7d00a36fb17f81495.mp4', 'uploads/fallbacksElement/FallbackThumbnail.webp', '2026-05-25 01:24:29', 0, 'test', 1, 'humour', '9affb6eb4f7986e7d00a36fb17f81495', 0, 0, 4);
+                                                                                                                                              (5, 0, 'test meme', 12, 'uploads/videos/9affb6eb4f7986e7d00a36fb17f81495/9affb6eb4f7986e7d00a36fb17f81495.mp4', 'uploads/fallbacksElement/FallbackThumbnail.webp', '2026-05-25 01:24:29', 1, 'test', 1, 'humour', '9affb6eb4f7986e7d00a36fb17f81495', 0, 0, 4);
 
 --
 -- Index pour les tables déchargées
@@ -263,7 +264,7 @@ ALTER TABLE `messenger_messages`
 -- AUTO_INCREMENT pour la table `opinion`
 --
 ALTER TABLE `opinion`
-    MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=233;
+    MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=249;
 
 --
 -- AUTO_INCREMENT pour la table `subscribe`
