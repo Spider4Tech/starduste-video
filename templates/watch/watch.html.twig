@@ -306,49 +306,37 @@
             }
         })
 
-        document.addEventListener("DOMContentLoaded", async function CheckCommentsLikes(){
-            const idvideo = document.getElementById('btnlikevideo').dataset.videoid;
-            const btndislikecomment = document.getElementById("btndislikecomment")
-            const btnlikecomment = document.getElementById("btnlikecomment")
-            const idCommentary = document.getElementById("btnlikecomment").dataset.commentid
-            const datatosend = {
-                idvideo: idvideo
-            }
+
+        //généré par ia
+        document.addEventListener("DOMContentLoaded", async function() {
+            // Récupère tous les IDs des commentaires de la page
+            const commentIds = [...document.querySelectorAll('.comment-item')]
+                .map(div => div.dataset.commentid);
+
+            if (commentIds.length === 0) return;
 
             try {
-                const response = await fetch('/checklike', {
+                const response = await fetch('/checkcommentlikes', {
                     method: 'POST',
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(datatosend)
-                })
+                    body: JSON.stringify({ commentIds: commentIds })
+                });
                 const data = await response.json();
-                console.log(data);
-                if (response.ok){
-                    if (data.action === "Liked") {
-                        btnLike.classList.add('active');
-                        console.log('actif donné aux likes')
+                // data.liked = [12, 45]  (ids des coms likés par l'user)
+                // data.disliked = [7]    (ids des coms dislikés)
 
+                data.liked.forEach(id => {
+                    const btn = document.querySelector(`.btn-like-comment[data-commentid="${id}"]`);
+                    if (btn) btn.classList.add('active');
+                });
 
+                data.disliked.forEach(id => {
+                    const btn = document.querySelector(`.btn-dislike-comment[data-commentid="${id}"]`);
+                    if (btn) btn.classList.add('active');
+                });
 
-                    }
-                    if (data.action === "Disliked"){
-                        btnDislike.classList.add('active');
-                        console.log('actif donné aux dislikes')
-
-                    }
-
-                    if (data.action === "nope"){
-                        console.log("pas d'actifs donné")
-                        return
-                    }
-
-                }
-            } catch (error){
-                console.error('ya un probleme la surement au niveau du controller', error)
-                console.log("probleme ici je pense")
-
-            }
-        })
+            } catch (error) { console.error(error); }
+        });
 
 
 
@@ -571,7 +559,11 @@
 
 
 
-        /**const btndislikecomment = document.getElementById("btndislikecomment")
+        /**
+         *
+         * scrapped code fragment to be deleted
+         *
+         * const btndislikecomment = document.getElementById("btndislikecomment")
         const btnlikecomment = document.getElementById("btnlikecomment")
 
         btndislikecomment.addEventListener('click', async function dislikecomment(){
