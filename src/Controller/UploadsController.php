@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Comments;
 use App\Form\RegisterType;
 use App\Repository\CommentsRepository;
+use App\Repository\UtilisateursRepository;
 use App\Repository\VideoRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -203,6 +204,74 @@ final class UploadsController extends AbstractController
             return new JsonResponse(['Message' => 'problème de reception des données, peut être que les données sont vides ou malformées']);
         }
     }
+
+
+    #[Route('/pfpupload', name: 'profilepicture_upload')]
+    public function profilepictureupload(Request $request, EntityManagerInterface $em, UtilisateursRepository $utilisateursRepository): JsonResponse
+    {
+        $projectDir = $this->getParameter('kernel.project_dir');
+        $user = $this->getUser();
+
+        $file = $request->files->get('profilepicture');
+
+        if (!$file){
+            return new JsonResponse(['success'=> false, 'error'=> 'Aucun fichier reçu']);
+        }
+
+        $filename = uniqid() . '.webp';
+        $destination = $projectDir . '/public/uploads/ProfilePictures/' . $user->getId();
+        if (!is_dir($destination)){
+            mkdir($destination, 0775, true);
+
+        }$file->move($destination, $filename);
+        $oldpath = $user->getPfppath();
+        if ($oldpath) {
+            $fullOldPath = $projectDir . '/public/' . $oldpath;
+            if (file_exists($fullOldPath)) {
+                unlink($fullOldPath);
+
+            }
+        }
+
+        $user->setPfppath('uploads/ProfilePictures/'.$user->getId().'/'.$filename);
+        $em->flush();
+
+        return new JsonResponse(['success'=>true]);
+    }
+
+    #[Route('/bannerupload', name: 'banner_upload')]
+    public function bannerupload(Request $request, EntityManagerInterface $em, UtilisateursRepository $utilisateursRepository): JsonResponse
+    {
+        $projectDir = $this->getParameter('kernel.project_dir');
+        $user = $this->getUser();
+
+        $file = $request->files->get('banner');
+
+        if (!$file){
+            return new JsonResponse(['success'=> false, 'error'=> 'Aucun fichier reçu']);
+        }
+
+        $filename = uniqid() . '.webp';
+        $destination = $projectDir . '/public/uploads/Banner/' . $user->getId();
+        if (!is_dir($destination)){
+            mkdir($destination, 0775, true);
+
+        }$file->move($destination, $filename);
+        $oldpath = $user->getBannerpath();
+        if ($oldpath) {
+            $fullOldPath = $projectDir . '/public/' . $oldpath;
+            if (file_exists($fullOldPath)) {
+                unlink($fullOldPath);
+
+            }
+        }
+
+        $user->setBannerpath('uploads/Banner/'.$user->getId().'/'.$filename);
+        $em->flush();
+
+        return new JsonResponse(['success'=>true]);
+    }
+
 
 
 

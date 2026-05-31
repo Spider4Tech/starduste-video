@@ -86,6 +86,9 @@ class Utilisateurs implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(nullable:true, name: "pfppath")]
     private ?string $pfppath = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $bannerpath = null;
+
     public function getUuid(): ?string
     {
         return $this->uuid;
@@ -239,5 +242,17 @@ class Utilisateurs implements UserInterface, PasswordAuthenticatedUserInterface
     }
     public function eraseCredentials(): void
     {
+    }
+
+    public function getBannerpath(): ?string
+    {
+        return $this->bannerpath;
+    }
+
+    public function setBannerpath(?string $bannerpath): static
+    {
+        $this->bannerpath = $bannerpath;
+
+        return $this;
     }
 }

@@ -1,0 +1,202 @@
+<!-- _modal_crop_banner.html.twig -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css">
+
+<style>
+    #cropBannerScene {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.78);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        z-index: 3000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+    }
+
+    #cropBannerScene.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    #cropBannerBox {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        width: 100%;
+        max-width: 600px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transform: scale(0.95) translateY(14px);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    #cropBannerScene.active #cropBannerBox {
+        transform: scale(1) translateY(0);
+    }
+
+    /* Override Cropper.js — pas de masque circulaire pour la bannière */
+    #cropBannerBox .cropper-view-box,
+    #cropBannerBox .cropper-face {
+        border-radius: 0;
+    }
+
+    #cropBannerBox .cropper-view-box {
+        outline: 2px solid var(--accent);
+        outline-offset: 0;
+    }
+
+    #cropBannerBox .cropper-dashed {
+        border-color: rgba(124, 106, 247, 0.4);
+    }
+
+    #cropBannerBox .cropper-point {
+        background: var(--accent);
+    }
+
+    #cropBannerBox .cropper-line {
+        background: rgba(124, 106, 247, 0.3);
+    }
+
+    #cropBannerBox .cropper-modal {
+        background: rgba(10, 10, 15, 0.7);
+    }
+
+    #cropBannerBox .cropper-bg {
+        background-image: none;
+        background-color: #0d0d1a;
+    }
+</style>
+
+<div id="cropBannerScene">
+    <div id="cropBannerBox">
+
+        <!-- Header -->
+        <div class="crop-modal-header">
+            <button class="crop-modal-close" id="cropBannerClose" aria-label="Fermer">
+                <i class="bi bi-x-lg"></i>
+            </button>
+            <h2>Recadrer la bannière</h2>
+        </div>
+
+        <!-- Zone Cropper -->
+        <div class="crop-modal-body">
+            <div class="crop-img-wrap">
+                <img id="cropBannerImage" src="" alt="à recadrer">
+            </div>
+            <div class="crop-hint">
+                <i class="bi bi-arrows-move" style="font-size:11px"></i>
+                Glisse pour repositionner · Molette pour zoomer
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="crop-modal-footer">
+            <button class="btn-crop-cancel" id="cropBannerCancel">
+                <i class="bi bi-x" style="font-size:14px"></i> Annuler
+            </button>
+            <button class="btn-crop-apply" id="cropBannerApply">
+                <i class="bi bi-check2" style="font-size:14px"></i> Appliquer
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
+<script>
+    let cropperBanner = null;
+
+    function openCropBanner(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const image = document.getElementById('cropBannerImage');
+
+            if (cropperBanner) {
+                cropperBanner.destroy();
+                cropperBanner = null;
+            }
+
+            image.addEventListener('load', function initCropper() {
+                cropperBanner = new Cropper(image, {
+                    aspectRatio: 16 / 5,   // ratio bannière
+                    viewMode: 1,
+                    dragMode: 'move',
+                    autoCropArea: 1,
+                    cropBoxResizable: false,
+                    cropBoxMovable: false,
+                });
+                image.removeEventListener('load', initCropper);
+            });
+
+            image.src = e.target.result;
+            document.getElementById('cropBannerScene').classList.add('active');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function closeCropBanner() {
+        document.getElementById('cropBannerScene').classList.remove('active');
+        if (cropperBanner) {
+            cropperBanner.destroy();
+            cropperBanner = null;
+        }
+    }
+
+    document.getElementById('cropBannerClose').addEventListener('click', closeCropBanner);
+    document.getElementById('cropBannerCancel').addEventListener('click', closeCropBanner);
+
+    document.getElementById('cropBannerApply').addEventListener('click', function() {
+        const btn = document.getElementById('cropBannerApply');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split" style="font-size:14px"></i> Envoi...';
+
+        const canvas = cropperBanner.getCroppedCanvas({ width: 1200, height: 375 });
+        canvas.toBlob(async function(blob) {
+            await uploadBanner(blob);
+            closeCropBanner();
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-check2" style="font-size:14px"></i> Appliquer';
+        }, 'image/jpeg', 0.92);
+    });
+
+    async function uploadBanner(bannerpicture) {
+        const datatosend = new FormData();
+        if (!bannerpicture) {
+            window.alert('Veuillez sélectionner une image de bannière');
+            return;
+        }
+        try {
+            if (bannerpicture.type.startsWith('image/')) {
+                datatosend.append('banner', bannerpicture);
+
+                const response = await fetch('/bannerupload', {
+                    method: 'POST',
+                    body: datatosend
+                });
+
+                if (!response.ok) {
+                    window.alert('Erreur serveur : ' + response.status);
+                    return;
+                }
+
+                const data = await response.json();
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    window.alert("Erreur lors de l'upload");
+                    console.log(data.error);
+                }
+            } else {
+                window.alert('Veuillez sélectionner une image');
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+</script>

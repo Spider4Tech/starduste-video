@@ -639,6 +639,9 @@
 
 <div class="toast-container" id="toastContainer"></div>
 {% include '/partials/_profile_modal.html.twig' %}
+{% include '/partials/_profile_customisation_modal.html.twig' %}
+{% include '/partials/_profile_customisation_profilepicture_modal.html.twig' %}
+{% include '/partials/_profile_cuustomisation_banner_modal.html.twig' %}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 <script>
@@ -712,6 +715,12 @@
     function toggleProfileModal() {
         const scene = document.getElementById('profileScene');
         if (scene) scene.classList.toggle('active');
+    }
+
+    function toggleProfileCustomisation(){
+        const scene = document.getElementById('modalProfileEdit');
+        if (scene) scene.classList.toggle('active');
+
     }
 </script>
 </body>

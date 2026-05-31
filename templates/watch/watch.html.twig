@@ -71,7 +71,7 @@
                     {# Input nouveau commentaire #}
                     {{ form_start(CommentForm, {attr: {id: 'Commentform'}}) }}
                     <div class="d-flex gap-3 mb-5">
-                        <img src="https://ui-avatars.com/api/?name=Moi&background=333&color=fff" alt="Avatar" class="rounded-circle" width="40" height="40">
+                        <img src="{{ asset(app.user.pfppath) }}" alt="Avatar" class="rounded-circle" width="40" height="40">
                         <div id="CommentInput" class="flex-grow-1" data-videoid={{ video.id }}>
                             {{ form_widget(CommentForm.commentaire, {'attr': {'class': 'comment-input', 'id': 'actualcommentarea'}}) }}
                             {{ form_end(CommentForm) }}
@@ -85,7 +85,7 @@
                     <div class="comment-list">
                         {% for Commentaire in Commentaires %}
                             <div class="d-flex gap-3 mb-4 comment-item" data-commentid="{{ Commentaire.id }}">
-                                <img src="{{ Commentaire.uploaderpfp }}" alt="Avatar" class="rounded-circle" width="40" height="40">
+                                <img src="{{ asset( Commentaire.uploaderpfp) }}" alt="Avatar" class="rounded-circle" width="40" height="40">
                                 <div class="flex-grow-1">
                                     <div class="d-flex align-items-center gap-2 mb-1">
                                         <span class="fw-bold small">{{ Commentaire.uploaderUsername }}</span>

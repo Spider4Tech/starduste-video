@@ -1,0 +1,419 @@
+<!-- _edit_profile_modal.html.twig -->
+<style>
+    .scene-edit {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        z-index: 2000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+    }
+
+    .scene-edit.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    .scene-edit .modal-box {
+        transform: scale(0.95) translateY(16px);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .scene-edit.active .modal-box {
+        transform: scale(1) translateY(0);
+    }
+
+    .modal-box {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        width: 100%;
+        max-width: 460px;
+        max-height: 92vh;
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .edit-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--border-subtle);
+        flex-shrink: 0;
+    }
+
+    .edit-header h2 {
+        font-family: 'Syne', sans-serif;
+        font-size: 1rem;
+        font-weight: 800;
+        flex: 1;
+    }
+
+    .modal-close {
+        background: transparent;
+        border: 1px solid var(--border-subtle);
+        color: var(--text-secondary);
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+        background: var(--bg-hover);
+        color: var(--text-primary);
+    }
+
+    /* Bannière */
+    .banner-edit {
+        height: 110px;
+        position: relative;
+        flex-shrink: 0;
+        overflow: hidden;
+        cursor: pointer;
+        background: linear-gradient(135deg, rgba(124,106,247,.35), rgba(249,112,102,.2), rgba(52,211,153,.1));
+    }
+
+    .banner-edit img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .banner-pattern {
+        position: absolute;
+        inset: 0;
+        background-image:
+            radial-gradient(circle at 20% 50%, rgba(124,106,247,.25) 0%, transparent 50%),
+            radial-gradient(circle at 80% 30%, rgba(249,112,102,.2) 0%, transparent 40%);
+    }
+
+    .banner-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,.45);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        opacity: 0;
+        transition: opacity .2s;
+    }
+
+    .banner-edit:hover .banner-overlay { opacity: 1; }
+    .banner-overlay i { font-size: 22px; color: #fff; }
+    .banner-overlay span { font-size: 12px; color: rgba(255,255,255,.8); font-weight: 500; }
+
+    /* Avatar dans le flux */
+    .avatar-row {
+        display: flex;
+        align-items: flex-end;
+        padding: 0 20px;
+        margin-top: -40px;
+        position: relative;
+        z-index: 2;
+        flex-shrink: 0;
+    }
+
+    .avatar-edit-wrap {
+        cursor: pointer;
+        position: relative;
+        width: 80px;
+        height: 80px;
+    }
+
+    .avatar-ring {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        padding: 3px;
+    }
+
+    .avatar-inner {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid var(--bg-card);
+        background: var(--bg-hover);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Syne', sans-serif;
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--accent);
+    }
+
+    .avatar-inner img { width: 100%; height: 100%; object-fit: cover; }
+
+    .avatar-cam-overlay {
+        position: absolute;
+        inset: 3px;
+        border-radius: 50%;
+        background: rgba(0,0,0,.52);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity .2s;
+        pointer-events: none;
+    }
+
+    .avatar-edit-wrap:hover .avatar-cam-overlay { opacity: 1; }
+    .avatar-cam-overlay i { font-size: 18px; color: #fff; }
+
+    /* Body */
+    .edit-body {
+        padding: 14px 20px 20px;
+        overflow-y: auto;
+        flex: 1;
+        scrollbar-width: thin;
+        scrollbar-color: var(--accent) transparent;
+    }
+
+    .preview-strip {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--bg-input);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius);
+        padding: 10px 14px;
+        margin-bottom: 16px;
+    }
+
+    .preview-strip .mini-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--accent);
+        flex-shrink: 0;
+    }
+
+    .preview-strip .mini-name {
+        font-family: 'Syne', sans-serif;
+        font-size: .85rem;
+        font-weight: 800;
+    }
+
+    .preview-strip .mini-handle { font-size: .72rem; color: var(--text-muted); }
+
+    .live-badge {
+        margin-left: auto;
+        font-size: .68rem;
+        color: var(--accent-3);
+        border: 1px solid rgba(52,211,153,.3);
+        padding: 2px 8px;
+        border-radius: 100px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .field-group { margin-bottom: 16px; }
+
+    .field-label {
+        font-size: .75rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        margin-bottom: 6px;
+    }
+
+    .field-input {
+        width: 100%;
+        padding: 10px 14px;
+        background: var(--bg-input);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius);
+        font-family: 'DM Sans', sans-serif;
+        font-size: .9rem;
+        color: var(--text-primary);
+        outline: none;
+        transition: border-color .2s;
+    }
+
+    .field-input:focus { border-color: var(--accent); }
+    .field-input::placeholder { color: var(--text-muted); }
+    .char-count { font-size: .72rem; color: var(--text-muted); text-align: right; margin-top: 4px; }
+
+    .edit-footer {
+        display: flex;
+        gap: 8px;
+        padding: 14px 20px;
+        border-top: 1px solid var(--border-subtle);
+        flex-shrink: 0;
+    }
+
+    .btn-ghost {
+        flex: 1;
+        padding: 9px;
+        border: 1px solid var(--border-subtle);
+        background: transparent;
+        color: var(--text-secondary);
+        border-radius: 100px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: .82rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all .2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .btn-ghost:hover { border-color: var(--border); color: var(--text-primary); }
+
+    .btn-accent {
+        flex: 1;
+        padding: 9px;
+        background: var(--accent);
+        border: none;
+        color: #fff;
+        border-radius: 100px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: .82rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all .2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .btn-accent:hover { background: #6b59e8; }
+
+    input[type=file] { display: none; }
+</style>
+
+<div class="scene-edit" id="modalProfileEdit">
+    <div class="modal-box">
+
+        <!-- Header -->
+        <div class="edit-header">
+            <button class="modal-close" onclick="toggleProfileCustomisation()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+            <h2>Personnaliser le profil</h2>
+        </div>
+
+        <!-- Bannière -->
+        <div class="banner-edit" onclick="document.getElementById('fileBanner').click()">
+            <div class="banner-pattern" id="bannerPattern"></div>
+            <img id="bannerPreview" src="" alt="" style="display:none">
+            <div class="banner-overlay">
+                <i class="bi bi-camera"></i>
+                <span>Changer la bannière</span>
+            </div>
+        </div>
+
+        <!-- Avatar -->
+        <div class="avatar-row">
+            <div class="avatar-edit-wrap" onclick="document.getElementById('fileAvatar').click()">
+                <div class="avatar-ring">
+                    <div class="avatar-inner">
+                        {% if app.user and app.user.pfppath %}
+                            <img id="avatarPreview" src="{{ asset(app.user.pfppath) }}" alt="avatar">
+                        {% else %}
+                            <img id="avatarPreview" src="{{ asset('uploads/fallbacksElement/FallbackPFP.png') }}" alt="avatar">
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="avatar-cam-overlay">
+                    <i class="bi bi-camera"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="edit-body">
+
+            <div class="preview-strip">
+                <img class="mini-avatar" id="miniAvatar"
+                     src="{{ app.user and app.user.pfppath ? asset(app.user.pfppath) : asset('uploads/fallbacksElement/FallbackPFP.png') }}"
+                     alt="">
+                <div>
+                    <div class="mini-name" id="miniName">{{ app.user ? app.user.pseudo : '' }}</div>
+                    <div class="mini-handle" id="miniHandle">@{{ app.user ? app.user.pseudo|lower : '' }} · membre</div>
+                </div>
+                <div class="live-badge">Aperçu live</div>
+            </div>
+
+            <div class="field-group">
+                <div class="field-label">Pseudo</div>
+                <input class="field-input" type="text" id="pseudoInput" maxlength="30"
+                       placeholder="Ton pseudo…"
+                       value="{{ app.user ? app.user.pseudo : '' }}"
+                       oninput="updatePreview()">
+                <div class="char-count">
+                    <span id="pseudoLen">{{ app.user ? app.user.pseudo|length : 0 }}</span>/30
+                </div>
+            </div>
+
+            <div class="field-group">
+                <div class="field-label">Bio</div>
+                <textarea class="field-input" id="bioInput" maxlength="120" rows="3"
+                          placeholder="Décris-toi en quelques mots…"
+                          oninput="updateBioCount()"
+                          style="resize:none;line-height:1.5"></textarea>
+                <div class="char-count"><span id="bioLen">0</span>/120</div>
+            </div>
+
+        </div>
+
+        <div class="edit-footer">
+            <button class="btn-ghost" onclick="toggleProfileCustomisation()">
+                <i class="bi bi-x" style="font-size:14px"></i> Annuler
+            </button>
+            <button class="btn-accent">
+                <i class="bi bi-check2-circle" style="font-size:14px"></i> Enregistrer
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<!-- Inputs file — déclenchent les modals crop -->
+<input type="file" id="fileAvatar" accept="image/*"
+       onchange="openCropAvatar(this.files[0]); this.value='';">
+<input type="file" id="fileBanner" accept="image/*"
+       onchange="openCropBanner(this.files[0]); this.value='';">
+
+<script>
+    function toggleProfileCustomisation() {
+        document.getElementById('modalProfileEdit').classList.toggle('active');
+    }
+
+    function updatePreview() {
+        const v = document.getElementById('pseudoInput').value;
+        document.getElementById('miniName').textContent = v || 'Pseudo';
+        document.getElementById('pseudoLen').textContent = v.length;
+        document.getElementById('miniHandle').textContent = '@' + (v || 'pseudo').toLowerCase().replace(/\s+/, '') + ' · membre';
+    }
+
+    function updateBioCount() {
+        document.getElementById('bioLen').textContent = document.getElementById('bioInput').value.length;
+    }
+</script>
