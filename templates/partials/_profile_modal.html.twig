@@ -428,6 +428,106 @@
 
     .toggle.on::after { transform: translateX(16px); }
 
+    .live-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .live-status-card {
+        background: var(--bg-input);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius);
+        padding: 12px;
+    }
+
+    .live-status-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .live-status-title {
+        color: var(--text-primary);
+        font-size: 0.86rem;
+        font-weight: 700;
+    }
+
+    .live-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: #ff4444;
+        color: #fff;
+        font-size: 0.68rem;
+        font-weight: 800;
+        padding: 3px 8px;
+        border-radius: 100px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    .live-key-box {
+        display: flex;
+        gap: 6px;
+    }
+
+    .live-key-input,
+    .live-form-input {
+        width: 100%;
+        min-width: 0;
+        background: var(--bg-hover);
+        border: 1px solid var(--border-subtle);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.78rem;
+        padding: 9px 10px;
+        outline: none;
+    }
+
+    .live-key-input {
+        font-family: monospace;
+        color: var(--accent-3);
+    }
+
+    .live-form {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .live-form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .btn-live-icon {
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+        border-radius: 8px;
+        border: 1px solid var(--border-subtle);
+        background: var(--bg-hover);
+        color: var(--text-secondary);
+        cursor: pointer;
+    }
+
+    .btn-live-danger {
+        background: rgba(255,68,68,0.12);
+        color: #ff8888;
+        border-color: rgba(255,68,68,0.25);
+    }
+
+    .live-muted {
+        color: var(--text-muted);
+        font-size: 0.76rem;
+        line-height: 1.45;
+    }
+
     /* footer actions */
     .modal-footer-actions {
         display: flex;
@@ -469,9 +569,9 @@
 
     .btn-primary-sm:hover { background: #6b59e8; }
 
-</style>
-<div class="scene" id="profileScene">
-    <div class="modal-box">
+	</style>
+	<div class="scene" id="profileScene">
+	    <div class="modal-box">
 
         <!-- Banner -->
         <div class="profile-banner">
@@ -499,6 +599,7 @@
 
         <!-- Body -->
         <div class="modal-body">
+            {% set activeLive = currentUserLive|default(null) %}
 
             <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:6px;">
                 <div>
@@ -540,6 +641,9 @@
                 </button>
                 <button class="tab-btn" onclick="switchTab('videos', this)">
                     <i class="bi bi-play-circle" style="font-size:13px"></i> Vidéos
+                </button>
+                <button class="tab-btn" onclick="switchTab('live', this)">
+                    <i class="bi bi-broadcast" style="font-size:13px"></i> Live
                 </button>
                 <button class="tab-btn" onclick="switchTab('settings', this)">
                     <i class="bi bi-sliders" style="font-size:13px"></i> Réglages
@@ -625,6 +729,95 @@
                 </div>
             </div>
 
+            <!-- Tab: Live -->
+            <div class="tab-content" id="tab-live">
+                <div class="live-panel">
+                    {% if app.user %}
+                        <div class="live-status-card">
+                            <div class="live-status-head">
+                                <div class="live-status-title">Clé de live</div>
+                                <form method="post" action="{{ path('live_key_generate') }}">
+                                    <input type="hidden" name="regenerate" value="{{ app.user.liveStreamKey ? '1' : '0' }}">
+                                    <button type="submit" class="btn-live-icon" title="{{ app.user.liveStreamKey ? 'Régénérer' : 'Créer' }}">
+                                        <i class="bi bi-arrow-repeat"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            {% if app.user.liveStreamKey %}
+                                <div class="live-muted" style="margin-bottom:6px">Serveur RTMP</div>
+                                <div class="live-key-box" style="margin-bottom:8px">
+                                    <input class="live-key-input" id="liveRtmpUrl" type="text" readonly value="{{ liveRtmpUrl|default('rtmp://localhost:1935/live') }}">
+                                    <button class="btn-live-icon" type="button" onclick="copyInputValue('liveRtmpUrl')" title="Copier"><i class="bi bi-clipboard"></i></button>
+                                </div>
+                                <div class="live-muted" style="margin-bottom:6px">Clé de stream</div>
+                                <div class="live-key-box">
+                                    <input class="live-key-input" id="liveStreamKey" type="password" readonly value="{{ app.user.liveStreamKey }}">
+                                    <button class="btn-live-icon" type="button" onclick="toggleLiveKey()" title="Afficher"><i class="bi bi-eye"></i></button>
+                                    <button class="btn-live-icon" type="button" onclick="copyInputValue('liveStreamKey')" title="Copier"><i class="bi bi-clipboard"></i></button>
+                                </div>
+                                <div class="live-muted" style="margin-top:8px">Dans OBS, mettez le serveur RTMP ci-dessus et cette clé comme clé de stream.</div>
+                            {% else %}
+                                <div class="live-muted">Créez votre clé pour configurer OBS, Streamlabs ou un autre encodeur.</div>
+                            {% endif %}
+                        </div>
+
+                        {% if activeLive %}
+                            <div class="live-status-card">
+                                <div class="live-status-head">
+                                    <div>
+                                        <div class="live-status-title">{{ activeLive.title }}</div>
+                                        <div class="live-muted">
+                                            {% if activeLive.live %}
+                                                {{ activeLive.viewers }} spectateur{{ activeLive.viewers > 1 ? 's' : '' }}
+                                            {% else %}
+                                                En attente du flux RTMP
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% if activeLive.live %}
+                                        <span class="live-pill">LIVE</span>
+                                    {% endif %}
+                                </div>
+                                <div class="modal-footer-actions">
+                                    <button class="btn-outline" type="button" onclick="location.href='{{ path('app_live_watch', {'slug': activeLive.slug}) }}'">
+                                        <i class="bi bi-box-arrow-up-right" style="font-size:13px"></i>
+                                        Ouvrir
+                                    </button>
+                                    {% if activeLive.live %}
+                                        <form method="post" action="{{ path('live_stop') }}" style="flex:1">
+                                            <button class="btn-outline btn-live-danger" type="submit" style="width:100%">
+                                                <i class="bi bi-stop-circle" style="font-size:13px"></i>
+                                                Arrêter
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if not activeLive or not activeLive.live %}
+                            <form class="live-form live-status-card" method="post" action="{{ path('live_start') }}">
+                                <input class="live-form-input" name="title" maxlength="128" value="Live de {{ app.user.pseudo }}" placeholder="Titre du live" required>
+                                <div class="live-form-grid">
+                                    <input class="live-form-input" name="category" maxlength="80" placeholder="Catégorie">
+                                    <input class="live-form-input" name="thumbnail_path" maxlength="255" placeholder="Miniature URL/chemin">
+                                </div>
+                                <input class="live-form-input" name="playback_url" maxlength="255" placeholder="URL HLS optionnelle">
+                                <button class="btn-primary-sm" type="submit">
+                                    <i class="bi bi-broadcast" style="font-size:13px"></i>
+                                    Préparer le live
+                                </button>
+                            </form>
+                        {% endif %}
+                    {% else %}
+                        <div class="live-status-card">
+                            <div class="live-status-title">Connexion requise</div>
+                            <div class="live-muted">Connectez-vous pour créer une clé et lancer un live.</div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
             <!-- Tab: Settings -->
             <div class="tab-content" id="tab-settings">
                 <div class="setting-row">
@@ -661,10 +854,22 @@
     </div>
 </div>
 <script>
-    function switchTab(name, btn) {
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('tab-' + name).classList.add('active');
-        btn.classList.add('active');
-    }
-</script>
+	    function switchTab(name, btn) {
+	        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+	        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+	        document.getElementById('tab-' + name).classList.add('active');
+	        btn.classList.add('active');
+	    }
+
+        function toggleLiveKey() {
+            const input = document.getElementById('liveStreamKey');
+            if (!input) return;
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        async function copyInputValue(id) {
+            const input = document.getElementById(id);
+            if (!input || !navigator.clipboard) return;
+            await navigator.clipboard.writeText(input.value);
+        }
+	</script>

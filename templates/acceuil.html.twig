@@ -352,7 +352,7 @@
         </button>
         {% if app.user %}
             <button class="nav-btn" onclick="toggleProfileModal()" style="padding:4px;border-radius:50%;width:40px;height:40px;">
-                {% if app.user.pfppath %}
+                {% if app.user and app.user.pfppath %}
                     <img src="{{ asset(app.user.pfppath) }}" class="nav-avatar" alt="avatar">
                 {% else %}
                      <img src="{{ asset('uploads/fallbacksElement/FallbackPFP.png') }}" class="nav-avatar" alt="avatar">
@@ -430,7 +430,7 @@
                 En direct
                 <span class="live-badge"><span class="live-dot"></span>LIVE</span>
             </h2>
-            <a href="#" class="section-link link-live">Tous les lives <i class="bi bi-arrow-right"></i></a>
+            <a href="{{ path('app_lives') }}" class="section-link link-live">Tous les lives <i class="bi bi-arrow-right"></i></a>
         </div>
         <div class="bandeau-body">
             {% if lives is defined and lives|length > 0 %}
@@ -438,10 +438,10 @@
                     <button class="scroll-btn scroll-btn-prev" onclick="scrollTrack('liveTrack', -1)"><i class="bi bi-chevron-left"></i></button>
                     <div class="live-track" id="liveTrack">
                         {% for live in lives %}
-                            <a {# }href="{{ path('app_watch', {'id': live.id}) }}"#} class="live-card">
+                            <a href="{{ path('app_live_watch', {'slug': live.slug}) }}" class="live-card">
                                 <div class="live-thumb">
-                                    {% if live.thumbnailPath is defined and live.thumbnailPath %}
-                                        <img src="{{ asset(live.thumbnailPath) }}" alt="{{ live.title }}" loading="lazy">
+                                    {% if live.thumbnailPath %}
+                                        <img src="{{ live.thumbnailPath starts with 'http' ? live.thumbnailPath : asset(live.thumbnailPath) }}" alt="{{ live.title }}" loading="lazy">
                                     {% else %}
                                         <div class="live-thumb-placeholder"><i class="bi bi-broadcast"></i></div>
                                     {% endif %}
@@ -451,19 +451,22 @@
                                         <div class="live-viewers-pos"><i class="bi bi-eye-fill"></i> {{ live.viewers }}</div>
                                     {% endif %}
                                 </div>
-                                <div class="live-info">
-                                    <div class="live-avatar">
-                                        {% if live.user is defined and live.user.pfppath is defined and live.user.pfppath %}
-                                            <img src="{{ asset(live.user.pfppath) }}" alt="">
+                                    <div class="live-info">
+                                        <div class="live-avatar">
+                                        {% if live.streamer and live.streamer.pfppath %}
+                                            <img src="{{ asset(live.streamer.pfppath) }}" alt="">
                                         {% else %}
                                             <i class="bi bi-person-fill"></i>
                                         {% endif %}
+                                        </div>
+                                        <div class="live-meta">
+                                            <div class="live-title">{{ live.title }}</div>
+                                        <div class="live-channel">{{ live.streamer ? live.streamer.pseudo : 'Créateur' }}</div>
+                                        {% if live.category %}
+                                            <div class="live-channel">{{ live.category }}</div>
+                                        {% endif %}
+                                        </div>
                                     </div>
-                                    <div class="live-meta">
-                                        <div class="live-title">{{ live.title }}</div>
-                                        <div class="live-channel">{% if live.user is defined %}{{ live.user.username ?? live.user.email }}{% endif %}</div>
-                                    </div>
-                                </div>
                             </a>
                         {% endfor %}
                     </div>

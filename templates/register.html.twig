@@ -264,6 +264,7 @@
             {{ form_label(registerform.password) }}
             {{ form_widget(registerform.password, {'attr': {'id': 'password'}}) }}
             {{ form_errors(registerform.password) }}
+            <p style="color: #6c5ce7">votre mot de pass doit faire plus de 8 caractères et avoir un symbol, une lettre et un chiffre</p>
             {# <input type="checkbox" onclick="showpassword()"> Afficher le mot de passe
             #}            {# {{ form_widget(registerform._token) }}#}
 

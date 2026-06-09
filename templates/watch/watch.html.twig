@@ -1,4 +1,5 @@
 {# templates/video_test/controller.html.twig #}
+{##}
 {% extends '/base_video.html.twig' %}
 
 {% block body %}
@@ -39,6 +40,9 @@
                                 <button class="btn-action">
                                     <i class="bi bi-share"></i> Partager
                                 </button>
+                                <button class="btn-action" id="btn-report-video" data-videoid="{{ video.id }}">
+                                    <i class="bi bi-flag"></i> Signaler
+                                </button>
                             </div>
                         </div>
 
@@ -71,7 +75,7 @@
                     {# Input nouveau commentaire #}
                     {{ form_start(CommentForm, {attr: {id: 'Commentform'}}) }}
                     <div class="d-flex gap-3 mb-5">
-                        <img src="{{ asset(app.user.pfppath) }}" alt="Avatar" class="rounded-circle" width="40" height="40">
+                        <img src="{{ app.user and app.user.pfppath ? asset(app.user.pfppath) : asset('uploads/fallbacksElement/FallbackPFP.png') }}" alt="Avatar" class="rounded-circle" width="40" height="40">
                         <div id="CommentInput" class="flex-grow-1" data-videoid={{ video.id }}>
                             {{ form_widget(CommentForm.commentaire, {'attr': {'class': 'comment-input', 'id': 'actualcommentarea'}}) }}
                             {{ form_end(CommentForm) }}
@@ -102,6 +106,11 @@
                                             <span class="dislike-count" id="dislikecommentcount">{{ Commentaire.Dislikes }}</span>
                                         </button>
                                         <span class="cursor-pointer" style="opacity: 0.6; transition: 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6">Répondre</span>
+                                        <button class="btn-comment-action btn-report-comment"
+                                                data-commentid="{{ Commentaire.id }}"
+                                                data-videoid="{{ video.id }}">
+                                            <i class="bi bi-flag"></i> Signaler
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -122,6 +131,7 @@
             </div>
         </div>
     </div>
+    {{ include('partials/_report_modal.html.twig') }}
 {% endblock %}
 
 {% block stylesheets %}
@@ -263,6 +273,8 @@
     {{ parent() }}
     <script>
 
+        const isloggedin = {{ app.user ? 'true' : 'false' }};
+
         document.addEventListener("DOMContentLoaded", async function(){
             const idvideo = document.getElementById('btnlikevideo').dataset.videoid;
             const btnLike = document.getElementById("btnlikevideo")
@@ -348,7 +360,7 @@
                 controlBar: {
                     children: [
                         'playToggle',
-                        'volumePanel',
+                        {name: 'volumePanel', inline: false},
                         'progressControl',
                         'currentTimeDisplay',
                         'timeDivider',
@@ -554,6 +566,91 @@
                     }
                 } catch (error) { console.error(error); }
             });
+        });
+
+
+
+
+
+
+
+
+        //modal du report
+
+
+
+
+        // --- Signalement ---
+        const modalReport = document.getElementById('modal-report');
+        let reportContext = { type: null, videoId: null, commentId: null };
+
+        function openReportModal(type, videoId, commentId = null) {
+            if(!isloggedin){
+                alert("Vous devez être connecté pour signaler.");
+                return;
+            }
+            reportContext = { type, videoId, commentId };
+            document.getElementById('report-reason').value = '';
+            document.getElementById('report-precision').value = '';
+            modalReport.style.display = 'flex';
+        }
+
+        function closeReportModal() {
+            modalReport.style.display = 'none';
+        }
+
+        // Ouvrir depuis vidéo
+        document.getElementById('btn-report-video').addEventListener('click', function() {
+            openReportModal('video', this.dataset.videoid);
+        });
+
+        // Ouvrir depuis commentaires
+        document.querySelectorAll('.btn-report-comment').forEach(btn => {
+            btn.addEventListener('click', function() {
+                openReportModal('comment', this.dataset.videoid, this.dataset.commentid);
+            });
+        });
+
+        // Fermer
+        document.getElementById('btn-close-report').addEventListener('click', closeReportModal);
+        document.getElementById('btn-cancel-report').addEventListener('click', closeReportModal);
+        modalReport.addEventListener('click', function(e) {
+            if (e.target === modalReport) closeReportModal();
+        });
+
+        // Soumettre
+        document.getElementById('btn-submit-report').addEventListener('click', async function() {
+            const reasonId = document.getElementById('report-reason').value;
+            if (!reasonId) {
+                alert('Veuillez choisir une raison.');
+                return;
+            }
+
+            const body = {
+                type:       reportContext.type,
+                videoId:    reportContext.videoId,
+                commentId:  reportContext.commentId,
+                raisonId:   reasonId,
+                precision:  document.getElementById('report-precision').value
+            };
+
+            try {
+                const response = await fetch('/reporting', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    closeReportModal();
+                    // Feedback visuel optionnel
+                    alert('Signalement envoyé, merci.');
+                } else {
+                    alert('Erreur : ' + (data.error ?? 'inconnue'));
+                }
+            } catch (error) {
+                console.error(error);
+            }
         });
 
 

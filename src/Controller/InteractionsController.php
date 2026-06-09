@@ -144,10 +144,13 @@ public function commentarylike(EntityManagerInterface $em, OpinionRepository $op
         }
         $uuidVideo = $data['idVideo'];
         $idcommentaire = $data['idcommentaire'];
+        $user = $this->getUser();
 
         $Video = $videoRepository->findOneBy(['id' => $uuidVideo]);
         $commentaire = $commentsRepository->findOneBy(['id' => $idcommentaire]);
-        $like = $opinionRepository->findOneBy(['video_id' => $uuidVideo, 'type' => "COMMENT",'Commentid' => $commentaire ]);
+        $like = $opinionRepository->findOneBy(['Commentid' => $commentaire,
+            'user_id' => $user,
+            'type' => 'COMMENT']);
         $user = $this->getUser();
 
     if ($like != null and $like->getValue() == 'Liked')
@@ -159,7 +162,17 @@ public function commentarylike(EntityManagerInterface $em, OpinionRepository $op
         return new JsonResponse(['action' => 'unliked', 'nombrelike' => $commentaire->getComlike()]);
     }
 
-        elseif($like == null or $like->getValue() == 'Disliked') {
+        if($like == null or $like->getValue() == 'Disliked') {
+
+
+            if ($like and $like->getValue() == 'Disliked') {
+            $commentaire->setComdislike($commentaire->getComdislike()-1);
+
+            $em->remove($like);
+
+
+
+            }
             $Opinion = new Opinion();
             $Opinion->setUserId($user);
             $Opinion->setCreatedAt(new \DateTime());
@@ -168,12 +181,7 @@ public function commentarylike(EntityManagerInterface $em, OpinionRepository $op
             $Opinion->setType("COMMENT");
             $Opinion->setCommentid($commentaire);
             $commentaire->setComlike($commentaire->getComlike()+1);
-            if ($like and $like->getValue() == 'Disliked') {
 
-                $em->remove($like);
-                $commentaire->setComdislike($commentaire->getComdislike()-1);
-                $em->flush();
-            }
             $em->persist($Opinion);
             $em->flush();
             return new JsonResponse(['action' => 'Liked', 'nombrelike' => $commentaire->getComlike(), 'nombredislike' => $commentaire->getComdislike()]);
@@ -230,7 +238,7 @@ public function commentarylike(EntityManagerInterface $em, OpinionRepository $op
         $em->persist($opinion);
         $em->flush();
 
-        return new JsonResponse(['action' => 'Disliked', 'nombrelike' => $commentaire->getComlike(), 'nombredislike' => $commentaire->getComdislike()]);
+        return new JsonResponse(['action' => 'Disliked', 'nombrelike' => $commentaire->getComlike(), 'nombredislike' => $commentaire->getComdislike(),]);
     }
 
     #[Route('/checkcommentlikes', name: 'check_comment_likes', methods: ['POST'])]

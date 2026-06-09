@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\CommentsRepository;
+use App\Repository\LiveStreamRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -38,7 +39,7 @@ final class DefaultController extends AbstractController
     }
 
     #[Route('/', name: 'app_index')]
-public function index(VideoRepository $videoRepository): Response{
+public function index(VideoRepository $videoRepository, LiveStreamRepository $liveStreamRepository): Response{
         $videos = $videoRepository->findBy(['isShort'=> false, ], ['id' => 'DESC']);
         $videosData = [];
         foreach ($videos as $video){
@@ -71,9 +72,17 @@ public function index(VideoRepository $videoRepository): Response{
 
             ];
         }
+        $currentUserLive = null;
+        if ($this->getUser() instanceof Utilisateurs) {
+            $currentUserLive = $liveStreamRepository->findOneBy(['streamer' => $this->getUser()]);
+        }
+
         return $this->render('acceuil.html.twig', [
             'videos' => $videosData,
-            'shorts'=> $shortsdata
+            'shorts'=> $shortsdata,
+            'lives' => $liveStreamRepository->findLiveStreams(),
+            'currentUserLive' => $currentUserLive,
+            'liveRtmpUrl' => getenv('LIVE_RTMP_PUBLIC_URL') ?: 'rtmp://localhost:1935/live',
         ]);
     }
 

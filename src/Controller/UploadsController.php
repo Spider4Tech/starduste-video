@@ -92,7 +92,8 @@ final class UploadsController extends AbstractController
                     $em->flush();
 
 
-                    return new JsonResponse(['message' => 'upload short reussi']);
+
+                    return $this->redirectToRoute('app_index');
 
                 }
                 else {
@@ -137,7 +138,7 @@ final class UploadsController extends AbstractController
 
 
             } else {
-                return new JsonResponse(['error' => $uploadform->getErrors(), 'message' => "le fichier uploadé n'est pas une videosd"]);
+                return new JsonResponse(['error' => $uploadform->getErrors(), 'message' => "le fichier uploadé n'est pas une video"]);
             }
         }
         if (!$uploadform->isSubmitted() || !$uploadform->isValid()) {

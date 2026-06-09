@@ -86,8 +86,12 @@ class Utilisateurs implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(nullable:true, name: "pfppath")]
     private ?string $pfppath = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    // Explicit column name to match the existing DB column (case-sensitive in some setups)
+    #[ORM\Column(length: 255, nullable: true, name: "bannerpath")]
     private ?string $bannerpath = null;
+
+    #[ORM\Column(length: 64, unique: true, nullable: true, name: "live_stream_key")]
+    private ?string $liveStreamKey = null;
 
     public function getUuid(): ?string
     {
@@ -252,6 +256,18 @@ class Utilisateurs implements UserInterface, PasswordAuthenticatedUserInterface
     public function setBannerpath(?string $bannerpath): static
     {
         $this->bannerpath = $bannerpath;
+
+        return $this;
+    }
+
+    public function getLiveStreamKey(): ?string
+    {
+        return $this->liveStreamKey;
+    }
+
+    public function setLiveStreamKey(?string $liveStreamKey): static
+    {
+        $this->liveStreamKey = $liveStreamKey;
 
         return $this;
     }

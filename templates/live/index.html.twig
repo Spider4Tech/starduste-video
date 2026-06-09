@@ -1,0 +1,79 @@
+{% extends '/base_video.html.twig' %}
+
+{% block title %}Lives - Starduste{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .lives-page { min-height: 100vh; padding: 32px clamp(16px, 4vw, 56px); background: #0a0a0f; }
+        .lives-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+        .lives-title { margin: 0; font-size: clamp(1.8rem, 4vw, 3rem); }
+        .lives-subtitle { color: rgba(255,255,255,0.58); margin: 6px 0 0; }
+        .lives-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .live-card { display: block; color: inherit; text-decoration: none; background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; overflow: hidden; transition: transform .2s, border-color .2s; }
+        .live-card:hover { transform: translateY(-3px); border-color: rgba(255,68,68,.45); }
+        .live-thumb { position: relative; aspect-ratio: 16/9; background: linear-gradient(135deg, #1a0808, #111126); overflow: hidden; }
+        .live-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .live-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; color: rgba(255,255,255,.45); }
+        .live-badge { position: absolute; top: 10px; left: 10px; background: #ff4444; color: #fff; font-size: .72rem; font-weight: 800; padding: 4px 9px; border-radius: 999px; letter-spacing: .05em; }
+        .live-viewers { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,.65); color: #fff; font-size: .78rem; padding: 3px 9px; border-radius: 999px; }
+        .live-info { display: flex; gap: 11px; padding: 13px; }
+        .live-avatar { width: 38px; height: 38px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 2px solid #ff4444; background: #22223a; display: flex; align-items: center; justify-content: center; }
+        .live-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .live-meta { min-width: 0; }
+        .live-name { font-weight: 700; line-height: 1.35; margin-bottom: 3px; }
+        .live-channel, .live-category { color: rgba(255,255,255,.58); font-size: .85rem; }
+        .empty-live { border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 48px 20px; text-align: center; color: rgba(255,255,255,.62); }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <main class="lives-page">
+        <div class="lives-head">
+            <div>
+                <h1 class="lives-title syne">Lives</h1>
+                <p class="lives-subtitle">Les créateurs actuellement en direct sur Starduste.</p>
+            </div>
+            <a href="{{ path('app_index') }}" class="btn btn-outline-light btn-sm">Accueil</a>
+        </div>
+
+        {% if lives|length > 0 %}
+            <div class="lives-grid">
+                {% for live in lives %}
+                    <a class="live-card" href="{{ path('app_live_watch', {'slug': live.slug}) }}">
+                        <div class="live-thumb">
+                            {% if live.thumbnailPath %}
+                                <img src="{{ live.thumbnailPath starts with 'http' ? live.thumbnailPath : asset(live.thumbnailPath) }}" alt="{{ live.title }}" loading="lazy">
+                            {% else %}
+                                <div class="live-placeholder"><i class="bi bi-broadcast"></i></div>
+                            {% endif %}
+                            <div class="live-badge">LIVE</div>
+                            <div class="live-viewers"><i class="bi bi-eye-fill"></i> {{ live.viewers }}</div>
+                        </div>
+                        <div class="live-info">
+                            <div class="live-avatar">
+                                {% if live.streamer and live.streamer.pfppath %}
+                                    <img src="{{ asset(live.streamer.pfppath) }}" alt="">
+                                {% else %}
+                                    <i class="bi bi-person-fill"></i>
+                                {% endif %}
+                            </div>
+                            <div class="live-meta">
+                                <div class="live-name">{{ live.title }}</div>
+                                <div class="live-channel">{{ live.streamer ? live.streamer.pseudo : 'Créateur' }}</div>
+                                {% if live.category %}
+                                    <div class="live-category">{{ live.category }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-live">
+                <i class="bi bi-broadcast" style="font-size:2rem"></i>
+                <p style="margin:12px 0 0">Aucun live en ce moment.</p>
+            </div>
+        {% endif %}
+    </main>
+{% endblock %}

@@ -1,5 +1,6 @@
 {# templates/video_test/short.html.twig #}
 {% extends '/base_video.html.twig' %}
+{#short.html.twig#}
 
 {% block title %}{{ short.title }} — Starduste{% endblock %}
 
@@ -53,7 +54,6 @@
             flex-shrink: 0;
         }
 
-        /* La vidéo elle-même */
         .short-wrapper video {
             width: 100%;
             height: 100%;
@@ -61,7 +61,6 @@
             display: block;
         }
 
-        /* VideoJS override : pas de barre native, on la fait nous-mêmes */
         .short-wrapper .video-js .vjs-control-bar { display: none !important; }
         .short-wrapper .video-js .vjs-big-play-button { display: none !important; }
         .short-wrapper .video-js { border-radius: 22px; overflow: hidden; }
@@ -85,7 +84,7 @@
             border-radius: 22px;
         }
 
-        /* ─── Barre de progression verticale (droite) ─── */
+        /* ─── Barre de progression verticale ─── */
         .short-progress {
             position: absolute;
             top: 50%;
@@ -121,7 +120,7 @@
             transition: bottom 0.1s linear;
         }
 
-        /* ─── Info bas de l'écran ─── */
+        /* ─── Info bas ─── */
         .short-info {
             position: absolute;
             bottom: 20px;
@@ -181,7 +180,7 @@
         .short-play-btn:hover { transform: translate(-50%, -50%) scale(1.1); }
         .short-play-btn i { font-size: 1.6rem; color: #fff; }
 
-        /* Timer flottant (coin haut gauche) */
+        /* Timer */
         .short-timer {
             position: absolute;
             top: 16px;
@@ -199,7 +198,7 @@
             letter-spacing: 0.05em;
         }
 
-        /* ─── Actions droite (hors vidéo) ─── */
+        /* ─── Actions droite ─── */
         .short-actions {
             display: flex;
             flex-direction: column;
@@ -235,18 +234,179 @@
             background: rgba(108,92,231,0.3);
             border-color: var(--accent-purple);
         }
-        .short-action-btn span {
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.03em;
-        }
+        .short-action-btn span { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.03em; }
+
+        /* États actifs like/dislike */
         .short-action-btn.liked .action-icon {
             background: rgba(232,67,147,0.25);
             border-color: var(--accent-pink);
             color: var(--accent-pink);
         }
+        .short-action-btn.disliked .action-icon {
+            background: rgba(108,92,231,0.2);
+            border-color: var(--accent-purple);
+            color: var(--accent-purple);
+        }
 
-        /* Bouton publier (bas des actions) */
+        /* Animation pop */
+        @keyframes pop {
+            0%   { transform: scale(1); }
+            40%  { transform: scale(1.25); }
+            100% { transform: scale(1); }
+        }
+        .short-action-btn.pop { animation: pop 0.25s ease-out; }
+
+        /* ─── Panel commentaires ─── */
+        .comments-panel {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(100%);
+            width: min(480px, 100vw);
+            max-height: 90dvh;
+            background: rgba(13, 13, 25, 0.97);
+            backdrop-filter: blur(20px);
+            border-radius: 20px 20px 0 0;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-bottom: none;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .comments-panel.open {
+            transform: translateX(-50%) translateY(0);
+        }
+        .comments-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            flex-shrink: 0;
+        }
+        .comments-panel-header h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 800;
+        }
+        .comments-close-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.6);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        .comments-close-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+        .comments-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 20px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-purple) transparent;
+        }
+
+        .comment-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .comment-item img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        .comment-body { flex: 1; }
+        .comment-author {
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+        .comment-text {
+            font-size: 0.85rem;
+            opacity: 0.85;
+            line-height: 1.4;
+            margin-bottom: 6px;
+        }
+        .comment-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .btn-comment-action {
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.45);
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+        .btn-comment-action:hover { background: rgba(255,255,255,0.07); color: #fff; }
+        .btn-like-comment.active { color: #a29bfe; background: rgba(108,92,231,0.15); }
+        .btn-dislike-comment.active { color: #fd79a8; background: rgba(253,121,168,0.1); }
+
+        /* Input commentaire */
+        .comments-input-wrap {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 55px 20px;
+            border-top: 1px solid rgba(255,255,255,0.07);
+            flex-shrink: 0;
+        }
+        .comments-input-wrap img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        .comment-input {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            color: #fff;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            font-family: 'DM Sans', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .comment-input:focus { border-color: var(--accent-purple); }
+        .comment-input::placeholder { color: rgba(255,255,255,0.3); }
+        .btn-send-comment {
+            background: var(--accent-purple);
+            border: none;
+            color: #fff;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            transition: background 0.2s, transform 0.15s;
+            flex-shrink: 0;
+        }
+        .btn-send-comment:hover { background: #a29bfe; transform: scale(1.1); }
+
+        /* Publish btn */
         .publish-btn {
             margin-top: 12px;
             background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
@@ -265,21 +425,12 @@
             transition: transform 0.2s, box-shadow 0.2s;
             box-shadow: 0 4px 20px rgba(108,92,231,0.35);
         }
-        .publish-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 28px rgba(108,92,231,0.5);
-        }
+        .publish-btn:hover { transform: scale(1.05); box-shadow: 0 6px 28px rgba(108,92,231,0.5); }
 
-        /* ─── Responsive : masquer les actions sur très petit écran ─── */
         @media (max-width: 520px) {
             .short-actions { display: none; }
             .shorts-layout { padding: 0; }
-            .short-wrapper {
-                height: 100dvh;
-                border-radius: 0;
-                aspect-ratio: unset;
-                width: 100%;
-            }
+            .short-wrapper { height: 100dvh; border-radius: 0; aspect-ratio: unset; width: 100%; }
         }
     </style>
 {% endblock %}
@@ -289,8 +440,6 @@
 
         {# ── Lecteur vertical ── #}
         <div class="short-wrapper" id="short-container">
-
-            {# VideoJS #}
             <video
                 id="starduste-short"
                 class="video-js vjs-fluid"
@@ -301,29 +450,23 @@
                 <source src="{{ asset(short.VideoUrl) }}">
             </video>
 
-            {# Dégradé bas #}
             <div class="short-overlay"></div>
-
-            {# Timer #}
             <div class="short-timer" id="short-timer">0:00 / 0:00</div>
 
-            {# Bouton play/pause central #}
             <div class="short-play-btn" id="short-play-btn">
                 <i class="bi bi-play-fill" id="short-play-icon"></i>
             </div>
 
-            {# Barre de progression verticale #}
             <div class="short-progress" id="short-progress">
                 <div class="short-progress-fill" id="short-progress-fill"></div>
                 <div class="short-progress-thumb" id="short-progress-thumb"></div>
             </div>
 
-            {# Infos titre #}
             <div class="short-info">
                 <div class="short-badge">Short</div>
                 <div class="short-title">{{ short.title }}</div>
                 <div class="short-meta">
-                    <i class="bi bi-eye-fill"></i> 0 vues
+                    <i class="bi bi-eye-fill"></i> {{ short.views ?? 0 }} vues
                     <span>•</span>
                     <i class="bi bi-calendar3"></i> {{ "now"|date("d M. Y") }}
                 </div>
@@ -332,14 +475,19 @@
 
         {# ── Actions droite ── #}
         <div class="short-actions">
-            <button class="short-action-btn" id="btn-like" title="J'aime">
+            <button class="short-action-btn" id="btn-like" data-videoid="{{ short.id }}" title="J'aime">
                 <div class="action-icon"><i class="bi bi-heart-fill"></i></div>
-                <span>0</span>
+                <span id="like-count">{{ short.likevid ?? 0 }}</span>
             </button>
 
-            <button class="short-action-btn" title="Commenter">
+            <button class="short-action-btn" id="btn-dislike" data-videoid="{{ short.id }}" title="Je n'aime pas">
+                <div class="action-icon"><i class="bi bi-hand-thumbs-down"></i></div>
+                <span id="dislike-count">{{ short.dislikevid ?? 0 }}</span>
+            </button>
+
+            <button class="short-action-btn" id="btn-comments" title="Commentaires">
                 <div class="action-icon"><i class="bi bi-chat-fill"></i></div>
-                <span>0</span>
+                <span>{{ Commentaires|length }}</span>
             </button>
 
             <button class="short-action-btn" title="Partager">
@@ -359,6 +507,51 @@
         </div>
 
     </div>
+
+    {# ── Panel commentaires ── #}
+    <div class="comments-panel" id="comments-panel">
+        <div class="comments-panel-header">
+            <h3>Commentaires</h3>
+            <button class="comments-close-btn" id="comments-close">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="comments-list" id="comments-list">
+            {% for Commentaire in Commentaires %}
+                <div class="comment-item" data-commentid="{{ Commentaire.id }}">
+                    <img src="{{ asset(Commentaire.uploaderpfp) }}" alt="avatar">
+                    <div class="comment-body">
+                        <div class="comment-author">{{ Commentaire.uploaderUsername }}</div>
+                        <div class="comment-text">{{ Commentaire.ComText }}</div>
+                        <div class="comment-actions">
+                            <button class="btn-comment-action btn-like-comment" data-commentid="{{ Commentaire.id }}">
+                                <i class="bi bi-hand-thumbs-up"></i>
+                                <span class="like-count">{{ Commentaire.Likes }}</span>
+                            </button>
+                            <button class="btn-comment-action btn-dislike-comment" data-commentid="{{ Commentaire.id }}">
+                                <i class="bi bi-hand-thumbs-down"></i>
+                                <span class="dislike-count">{{ Commentaire.Dislikes }}</span>
+                            </button>
+                            <span style="font-size:0.75rem;color:rgba(255,255,255,0.4);cursor:pointer">Répondre</span>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <p style="text-align:center;color:rgba(255,255,255,0.3);font-size:0.85rem;padding:20px 0">
+                    Aucun commentaire pour l'instant
+                </p>
+            {% endfor %}
+        </div>
+
+        <div class="comments-input-wrap">
+            <img src="{{ app.user and app.user.pfppath ? asset(app.user.pfppath) : asset('uploads/fallbacksElement/FallbackPFP.png') }}" alt="avatar">
+            <input type="text" class="comment-input" id="comment-input-short" placeholder="Ajouter un commentaire…">
+            <button class="btn-send-comment" id="btn-send-comment">
+                <i class="bi bi-send-fill"></i>
+            </button>
+        </div>
+    </div>
 {% endblock %}
 
 {% block javascripts %}
@@ -370,7 +563,7 @@
             const player = videojs('starduste-short', {
                 controls: false,
                 autoplay: true,
-                muted: false,   // nécessaire pour autoplay navigateur
+                muted: false,
                 loop: true,
             });
 
@@ -382,41 +575,26 @@
             const timerEl    = document.getElementById('short-timer');
             let hideTimer;
 
-            /* ── Helpers ── */
             const fmt = s => {
                 const m = Math.floor(s / 60);
                 const sec = Math.floor(s % 60).toString().padStart(2, '0');
                 return `${m}:${sec}`;
             };
 
-            /* ── Play / Pause au clic sur la vidéo ── */
             document.getElementById('short-container').addEventListener('click', function (e) {
                 if (e.target.closest('.short-progress') || e.target.closest('.short-actions')) return;
-                if (player.paused()) {
-                    player.play();
-                } else {
-                    player.pause();
-                }
+                player.paused() ? player.play() : player.pause();
             });
 
-            player.on('play', () => {
-                playIcon.className = 'bi bi-pause-fill';
-                showPlayBtn();
-            });
-            player.on('pause', () => {
-                playIcon.className = 'bi bi-play-fill';
-                showPlayBtn(true); // reste visible en pause
-            });
+            player.on('play', () => { playIcon.className = 'bi bi-pause-fill'; showPlayBtn(); });
+            player.on('pause', () => { playIcon.className = 'bi bi-play-fill'; showPlayBtn(true); });
 
             function showPlayBtn(stay = false) {
                 playBtn.classList.add('visible');
                 clearTimeout(hideTimer);
-                if (!stay) {
-                    hideTimer = setTimeout(() => playBtn.classList.remove('visible'), 900);
-                }
+                if (!stay) hideTimer = setTimeout(() => playBtn.classList.remove('visible'), 900);
             }
 
-            /* ── Barre de progression ── */
             player.on('timeupdate', () => {
                 const pct = player.duration() ? (player.currentTime() / player.duration()) * 100 : 0;
                 fill.style.height  = pct + '%';
@@ -424,19 +602,13 @@
                 timerEl.textContent = fmt(player.currentTime()) + ' / ' + fmt(player.duration() || 0);
             });
 
-            /* Clic sur la barre verticale pour se positionner */
             progressEl.addEventListener('click', function (e) {
                 const rect = progressEl.getBoundingClientRect();
                 const ratio = 1 - (e.clientY - rect.top) / rect.height;
                 player.currentTime(ratio * player.duration());
             });
 
-            /* ── Like toggle ── */
-            document.getElementById('btn-like').addEventListener('click', function () {
-                this.classList.toggle('liked');
-            });
-
-            /* ── Vitesse de lecture ── */
+            /* ── Vitesse ── */
             const speeds = [0.5, 1, 1.5, 2];
             let speedIdx = 1;
             document.getElementById('btn-speed').addEventListener('click', function () {
@@ -445,9 +617,247 @@
                 document.getElementById('speed-label').textContent = speeds[speedIdx] + '×';
             });
 
-            player.ready(function () {
-                console.log('Starduste Short — prêt !');
+            player.ready(() => console.log('Starduste Short — prêt !'));
+
+            /* ────────────────────────────────────────
+               LIKES / DISLIKES VIDÉO
+            ──────────────────────────────────────── */
+            const btnLike     = document.getElementById('btn-like');
+            const btnDislike  = document.getElementById('btn-dislike');
+            const nombrelike  = document.getElementById('like-count');
+            const nombredislike = document.getElementById('dislike-count');
+
+            function triggerPop(btn) {
+                btn.classList.remove('pop');
+                void btn.offsetWidth;
+                btn.classList.add('pop');
+                btn.addEventListener('animationend', () => btn.classList.remove('pop'), { once: true });
+            }
+
+            /* Vérifier l'état initial like/dislike */
+            (async () => {
+                const idvideo = btnLike.dataset.videoid;
+                try {
+                    const response = await fetch('/checklike', {
+                        method: 'POST',
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ idvideo })
+                    });
+                    const data = await response.json();
+                    if (data.action === "Liked")    btnLike.classList.add('liked');
+                    if (data.action === "Disliked") btnDislike.classList.add('disliked');
+                } catch (error) { console.error(error); }
+            })();
+
+            btnLike.addEventListener('click', async function () {
+                const idVideo = this.dataset.videoid;
+                try {
+                    const response = await fetch("/addvideolike", {
+                        method: 'POST',
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ idVideo })
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        if (data.action === "Liked") {
+                            this.classList.add('liked');
+                            triggerPop(this);
+                            if (btnDislike.classList.contains('disliked')) {
+                                btnDislike.classList.remove('disliked');
+                                nombredislike.textContent = data.nombredislike;
+                            }
+                            nombrelike.textContent = data.nombrelike;
+                        } else if (data.action === "unliked") {
+                            this.classList.remove('liked');
+                            triggerPop(this);
+                            nombrelike.textContent = data.nombrelike;
+                        }
+                    }
+                } catch (error) { console.error(error); }
             });
+
+            btnDislike.addEventListener('click', async function () {
+                const idVideo = btnLike.dataset.videoid;
+                try {
+                    const response = await fetch("/addvideodislike", {
+                        method: 'POST',
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ idVideo })
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        if (data.action === "Disliked") {
+                            this.classList.add('disliked');
+                            if (btnLike.classList.contains('liked')) {
+                                btnLike.classList.remove('liked');
+                                nombrelike.textContent = data.nombrelike;
+                            }
+                            triggerPop(this);
+                            nombredislike.textContent = data.nombredislike;
+                        } else if (data.action === "undisliked") {
+                            this.classList.remove('disliked');
+                            triggerPop(this);
+                            nombredislike.textContent = data.nombredislike;
+                        }
+                    }
+                } catch (error) { console.error(error); }
+            });
+
+            /* ────────────────────────────────────────
+               PANEL COMMENTAIRES
+            ──────────────────────────────────────── */
+            const commentsPanel = document.getElementById('comments-panel');
+
+            document.getElementById('btn-comments').addEventListener('click', () => {
+                commentsPanel.classList.add('open');
+            });
+            document.getElementById('comments-close').addEventListener('click', () => {
+                commentsPanel.classList.remove('open');
+            });
+
+            /* Vérifier l'état initial des likes de commentaires */
+            (async () => {
+                const commentIds = [...document.querySelectorAll('.comment-item')]
+                    .map(div => div.dataset.commentid);
+                if (commentIds.length === 0) return;
+                try {
+                    const response = await fetch('/checkcommentlikes', {
+                        method: 'POST',
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ commentIds })
+                    });
+                    const data = await response.json();
+                    data.liked.forEach(id => {
+                        const btn = document.querySelector(`.btn-like-comment[data-commentid="${id}"]`);
+                        if (btn) btn.classList.add('active');
+                    });
+                    data.disliked.forEach(id => {
+                        const btn = document.querySelector(`.btn-dislike-comment[data-commentid="${id}"]`);
+                        if (btn) btn.classList.add('active');
+                    });
+                } catch (error) { console.error(error); }
+            })();
+
+            /* Envoyer un commentaire */
+            document.getElementById('btn-send-comment').addEventListener('click', async function () {
+                const input = document.getElementById('comment-input-short');
+                const message = input.value.trim();
+                if (!message) return;
+
+                const idvideo = btnLike.dataset.videoid;
+                try {
+                    const response = await fetch("/commentupload", {
+                        method: 'POST',
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ message, uuidvideo: idvideo })
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        input.value = '';
+                        // Ajouter le commentaire dans la liste sans rechargement
+                        const list = document.getElementById('comments-list');
+                        const div = document.createElement('div');
+                        div.className = 'comment-item';
+                        div.dataset.commentid = data.id ?? '';
+                        div.innerHTML = `
+                            <img src="{{ app.user and app.user.pfppath ? asset(app.user.pfppath) : asset('uploads/fallbacksElement/FallbackPFP.png') }}" alt="avatar">
+                            <div class="comment-body">
+                                <div class="comment-author">{{ app.user ? app.user.pseudo : 'Invité' }}</div>
+                                <div class="comment-text">${message}</div>
+                                <div class="comment-actions">
+                                    <button class="btn-comment-action btn-like-comment" data-commentid="${data.id ?? ''}">
+                                        <i class="bi bi-hand-thumbs-up"></i>
+                                        <span class="like-count">0</span>
+                                    </button>
+                                    <button class="btn-comment-action btn-dislike-comment" data-commentid="${data.id ?? ''}">
+                                        <i class="bi bi-hand-thumbs-down"></i>
+                                        <span class="dislike-count">0</span>
+                                    </button>
+                                </div>
+                            </div>`;
+                        list.prepend(div);
+                        attachCommentListeners(div);
+                    }
+                } catch (error) { console.error(error); }
+            });
+
+            /* Like/dislike commentaires */
+            function attachCommentListeners(container) {
+                container.querySelectorAll('.btn-like-comment').forEach(btn => {
+                    btn.addEventListener('click', async function () {
+                        const idCommentary = this.dataset.commentid;
+                        const commentDiv = this.closest('.comment-item');
+                        const likecount = commentDiv.querySelector('.like-count');
+                        const dislikecount = commentDiv.querySelector('.dislike-count');
+                        const btndislike = commentDiv.querySelector('.btn-dislike-comment');
+                        const idvideo = btnLike.dataset.videoid;
+
+                        try {
+                            const response = await fetch("/addcommentarylike", {
+                                method: 'POST',
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ idVideo: idvideo, idcommentaire: idCommentary })
+                            });
+                            const data = await response.json();
+                            if (response.ok) {
+                                if (data.action === "Liked") {
+                                    this.classList.add('active');
+                                    triggerPop(this);
+                                    if (btndislike.classList.contains('active')) {
+                                        console.log("retiré l'actif du bouton dislike comment")
+                                        btndislike.classList.remove('active');
+                                        dislikecount.textContent = data.nombredislike;
+                                    }
+                                    likecount.textContent = data.nombrelike;
+                                } else if (data.action === "unliked") {
+                                    this.classList.remove('active');
+                                    triggerPop(this);
+                                    likecount.textContent = data.nombrelike;
+                                }
+                            }
+                        } catch (error) { console.error(error); }
+                    });
+                });
+
+                container.querySelectorAll('.btn-dislike-comment').forEach(btn => {
+                    btn.addEventListener('click', async function () {
+                        const idCommentary = this.dataset.commentid;
+                        const commentDiv = this.closest('.comment-item');
+                        const likecount = commentDiv.querySelector('.like-count');
+                        const dislikecount = commentDiv.querySelector('.dislike-count');
+                        const btnlike = commentDiv.querySelector('.btn-like-comment');
+                        const idvideo = btnLike.dataset.videoid;
+
+                        try {
+                            const response = await fetch("/addcommentarydislike", {
+                                method: 'POST',
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ idVideo: idvideo, idcommentaire: idCommentary })
+                            });
+                            const data = await response.json();
+                            if (response.ok) {
+                                if (data.action === "Disliked") {
+                                    this.classList.add('active');
+                                    if (btnlike.classList.contains('active')) {
+                                        btnlike.classList.remove('active');
+                                        likecount.textContent = data.nombrelike;
+                                    }
+                                    triggerPop(this);
+                                    dislikecount.textContent = data.nombredislike;
+                                } else if (data.action === "undisliked") {
+                                    this.classList.remove('active');
+                                    triggerPop(this);
+                                    dislikecount.textContent = data.nombredislike;
+                                }
+                            }
+                        } catch (error) { console.error(error); }
+                    });
+                });
+            }
+
+            /* Attacher les listeners aux commentaires existants */
+            document.querySelectorAll('.comment-item').forEach(item => attachCommentListeners(item));
+
         });
     </script>
 {% endblock %}
